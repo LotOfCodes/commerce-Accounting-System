@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>账单列表</title>
+<style>
+	:root {
+		--bg: #f3f6fb;
+		--panel: #fff;
+		--line: #dfe5ef;
+		--line-soft: #edf1f7;
+		--text: #1f2937;
+		--muted: #6b7280;
+		--blue: #3e7cff;
+		--blue-dark: #2f6dec;
+		--red: #d93025;
+	}
+	* {
+		box-sizing: border-box;
+	}
+	html,
+	body {
+		width: 100%;
+		min-height: 100%;
+		margin: 0;
+		font-family: Arial, "Microsoft YaHei", sans-serif;
+		background: var(--bg);
+		color: var(--text);
+	}
+	button,
+	input,
+	select {
+		font-family: inherit;
+	}
+	.bill-page {
+		min-height: 100%;
+		padding: 14px 14px 88px;
+	}
+	.toolbar,
+	.table-panel {
+		background: var(--panel);
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
+	}
+	.toolbar {
+		padding: 14px;
+	}
+	.summary-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	.page-title {
+		margin: 0;
+		font-size: 20px;
+		line-height: 28px;
+	}
+	.bill-count {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 28px;
+		padding: 0 10px;
+		border-radius: 6px;
+		background: #eef4ff;
+		color: var(--blue);
+		font-size: 13px;
+		font-weight: 700;
+	}
+	.table-panel {
+		margin-top: 14px;
+		overflow: hidden;
+	}
+	.table-scroll {
+		width: 100%;
+		overflow: auto;
+	}
+	.bill-table {
+		width: 100%;
+		min-width: 980px;
+		border-collapse: collapse;
+	}
+	.bill-table th,
+	.bill-table td {
+		border-bottom: 1px solid var(--line-soft);
+		padding: 12px;
+		text-align: left;
+		vertical-align: middle;
+		font-size: 13px;
+	}
+	.bill-table th {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: #f8fafc;
+		color: #4b5563;
+		font-weight: 700;
+	}
+	.check-cell {
+		width: 44px;
+		text-align: center;
+	}
+	.money {
+		color: var(--red);
+		font-size: 16px;
+		font-weight: 700;
+	}
+	.btn {
+		height: 34px;
+		padding: 0 14px;
+		border: 1px solid var(--line);
+		border-radius: 6px;
+		background: #fff;
+		color: var(--text);
+		font-size: 13px;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.btn:hover {
+		border-color: var(--blue);
+		color: var(--blue);
+	}
+	.btn.primary {
+		border-color: var(--blue);
+		background: var(--blue);
+		color: #fff;
+	}
+	.btn.primary:hover {
+		background: var(--blue-dark);
+		color: #fff;
+	}
+	.pagination {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 8px;
+		padding: 12px;
+		color: var(--muted);
+		font-size: 13px;
+	}
+	.page-num {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		border-radius: 6px;
+		background: var(--blue);
+		color: #fff;
+		font-weight: 700;
+	}
+	.bottom-tools {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		gap: 8px;
+		padding: 12px 14px;
+		background: rgba(31, 41, 55, 0.86);
+		backdrop-filter: blur(8px);
+	}
+	.bottom-tools .btn {
+		border-color: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.1);
+		color: #fff;
+	}
+	.bottom-tools .btn:hover {
+		border-color: #fff;
+		color: #fff;
+	}
+	.toast {
+		position: fixed;
+		left: 50%;
+		bottom: 76px;
+		transform: translateX(-50%);
+		display: none;
+		padding: 9px 14px;
+		border-radius: 6px;
+		background: rgba(17, 24, 39, 0.92);
+		color: #fff;
+		font-size: 13px;
+	}
+	.toast.show {
+		display: block;
+	}
+</style>
+</head>
+<body>
+	<div class="bill-page">
+		<section class="toolbar">
+			<div class="summary-row">
+				<h1 class="page-title">账单列表</h1>
+				<div class="bill-count">账单总数：<span id="billCount">2</span></div>
+			</div>
+		</section>
+
+		<section class="table-panel">
+			<div class="table-scroll">
+				<table class="bill-table">
+					<thead>
+						<tr>
+							<th class="check-cell"><input type="checkbox" id="checkAll" aria-label="全选"></th>
+							<th>账单生成日期</th>
+							<th>生成账单日期范围</th>
+							<th>订单数量</th>
+							<th>总金额</th>
+							<th>商家编号</th>
+						</tr>
+					</thead>
+					<tbody id="billRows">
+						<tr>
+							<td class="check-cell"><input type="checkbox" class="row-check" aria-label="选择账单 2026-07-03"></td>
+							<td>2026-07-03 12:00:00</td>
+							<td>2026-07-01 00:00:00 至 2026-07-03 23:59:59</td>
+							<td>2</td>
+							<td><span class="money">￥252.00</span></td>
+							<td>DF08</td>
+						</tr>
+						<tr>
+							<td class="check-cell"><input type="checkbox" class="row-check" aria-label="选择账单 2026-07-02"></td>
+							<td>2026-07-02 18:30:00</td>
+							<td>2026-07-02 00:00:00 至 2026-07-02 23:59:59</td>
+							<td>1</td>
+							<td><span class="money">￥88.00</span></td>
+							<td>DF11</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="pagination">
+				<span>共 2 条</span>
+				<button class="btn" type="button">上一页</button>
+				<span class="page-num">1</span>
+				<button class="btn" type="button">下一页</button>
+			</div>
+		</section>
+	</div>
+
+	<div class="bottom-tools">
+		<button class="btn primary" type="button" id="exportExcel">导出表格</button>
+		<button class="btn" type="button" id="shareLink">分享链接</button>
+	</div>
+	<div class="toast" id="toast">演示操作</div>
+
+<script src="../js/jquery.min.js"></script>
+<script>
+	$(function () {
+		var $toast = $('#toast');
+
+		function showToast(text) {
+			$toast.text(text).addClass('show');
+			window.clearTimeout(showToast.timer);
+			showToast.timer = window.setTimeout(function () {
+				$toast.removeClass('show');
+			}, 1400);
+		}
+
+		$('#checkAll').on('change', function () {
+			$('.row-check').prop('checked', this.checked);
+		});
+
+		$('#exportExcel').on('click', function () {
+			showToast('导出表格：演示操作');
+		});
+
+		$('#shareLink').on('click', function () {
+			showToast('分享链接已生成');
+		});
+	});
+</script>
+</body>
+</html>

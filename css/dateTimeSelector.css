@@ -1,0 +1,161 @@
+.dateTimeSelector-wraper{
+	float:left;
+	position: fixed;
+	width: 500px;
+	background-color: #FFF;
+	box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.20);
+	border-radius: 4px;
+	box-sizing: border-box;
+	padding: 5px;
+	left: 100px;
+	user-select: none;
+	display: none;
+	z-index: 999;
+}
+.dateTimeSelector-wraper .left{
+	float:left;
+	width: 50%;
+	padding-right: 5px;
+	box-sizing: border-box;
+}
+.dateTimeSelector-wraper .right{
+	float:left;
+	width: 50%;
+	padding-left: 5px;
+	box-sizing: border-box;
+}
+.dateTimeSelector-wraper .dateTimeSelector{
+	float:left;
+	width: 100%;
+}
+.dateTimeSelector-wraper .dateTimeSelector-header{
+	float:left;
+	width: 100%;
+}
+.dateTimeSelector-wraper .month-slider{
+	float:left;
+	width: 100%;
+	height: 30px;
+}
+.dateTimeSelector-wraper .slide-to-left,.dateTimeSelector-wraper .slide-to-right{
+	float:left;
+	width: 33.333%;
+	height: 30px;
+	line-height: 30px;
+	font-size: 14px;
+	font-family: "宋体";
+	color: #676767;
+	text-align: center;
+	cursor: pointer;
+}
+.dateTimeSelector-wraper .slide-to-left::before{
+	content: "<";
+}
+.dateTimeSelector-wraper .slide-to-right::before{
+	content: ">";
+}
+.dateTimeSelector-wraper .curr-date{
+	float:left;
+	width: 33.333%;
+	height: 30px;
+	line-height: 30px;
+	font-size: 14px;
+	color: #676767;
+	text-align: center;
+}
+.dateTimeSelector-wraper .weeks{
+	float:left;
+	width: 100%;
+	background-color: #D9D9D9;
+	cursor: pointer;
+}
+.dateTimeSelector-wraper .week{
+	float:left;
+	width: 14.285%;
+	height: 30px;
+	line-height: 30px;
+	font-size: 14px;
+	color: #000000;
+	font-weight: bold;	
+	text-align: center;
+	border-top: solid 1px #FFF;
+	margin-top: 1px;	
+}
+.dateTimeSelector-wraper .dates{
+	float:left;
+	width: 100%;
+	cursor: pointer;
+}
+.dateTimeSelector-wraper .date{
+	float:left;
+	width: 14.285%;
+	height: 30px;
+	line-height: 30px;
+	font-size: 14px;
+	color: #000000;	
+	text-align: center;
+	border-bottom: solid 1px #D9D9D9;	
+}
+.dateTimeSelector-wraper .actived{
+	
+	color: #FFF;	
+	background-color: #00AAFF;
+	border-bottom: solid 1px #D9D9D9;	
+}
+.dateTimeSelector-wraper .disabled{
+	color: #B6B6B6;	
+	cursor: no-drop;
+}
+
+.dateTimeSelector-wraper .date:hover{
+	
+	color: #000000;	
+	background-color: #D9D9D9;	
+}
+.dateTimeSelector-wraper .actived:hover{
+	
+	color: #FFF;	
+	background-color: #00AAFF;	
+}
+.dateTimeSelector-wraper .disabled:hover{
+	color: #B6B6B6;	
+	cursor: no-drop;
+}
+.dateTimeSelector-wraper .time{
+	float:left;
+	width: 100%;
+	margin-top: 5px;
+}
+.dateTimeSelector-wraper .clock,.dateTimeSelector-wraper .minute,.dateTimeSelector-wraper .second{
+	float:left;
+	height: 20px;
+	font-size: 12px;
+	line-height: 20px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.dateTimeSelector-wraper .colon{
+	float:left;
+	height: 20px;
+	font-size: 12px;
+	line-height: 20px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.dateTimeSelector-wraper .butons{
+	float:left;
+	margin-top: 5px;
+	width: 100%;
+}
+.dateTimeSelector-wraper .buton{
+	float:right;
+	height: 20px;
+	font-size: 12px;
+	line-height: 20px;
+	padding-left: 10px;
+	padding-right: 10px;
+	color: #FFF;
+	background-color: #A79DFF;
+	border: solid 1px #CCC;
+	cursor: pointer;
+}

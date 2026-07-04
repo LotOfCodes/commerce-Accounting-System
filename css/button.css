@@ -1,0 +1,21 @@
+.button{
+	float: left;
+	text-align: center;
+	font-size: 12px;
+	line-height: 24px;
+	height: 24px;
+	box-sizing: border-box;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 2px;
+	cursor: pointer;
+	margin-left: 10px;
+}
+.blb{
+	color: white;
+	background-color: #5259F9;
+}
+.bc-btn{
+	color: #3E3E3E;
+	border: 1px solid #ccc;
+}

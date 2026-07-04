@@ -1,0 +1,65 @@
+/*表格 b*/
+.table-wraper
+{
+	float: left;
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.gray-white{
+	/*float: left;*/
+	border-left: solid 1px #e6e6e6;
+	border-spacing: 1px;
+	border-collapse: collapse;
+	box-sizing: border-box;
+}
+
+.gray-white>thead{
+	width: 100%;
+	/*position: fixed;*/
+}
+.gray-white>thead>tr{
+	width: 100%;
+	height: 40px;
+}
+.gray-white>thead>tr>th{
+	text-align: left;
+	background-color: #f6f9fd;
+	font-size: 14px;
+	border: 0;
+	margin: 0;
+	padding: 0;
+	height: 40px;
+	padding-left: 10px;
+	border-right: solid 1px #e6e6e6;
+    border-top: solid 1px #e6e6e6;
+    border-bottom: 1px solid #e6e6e6;
+}
+.gray-white>tbody{
+	width: 100%;
+	background-color: white;
+}
+.gray-white>tbody>tr{
+	width: 100%;
+	height: 20px;
+}
+.gray-white>tbody>tr:nth-child(even){
+	background-color: #F3F3F3;
+}
+.gray-white>tbody>.red-tr{
+	background-color: #FF9E9F!important;
+}
+.gray-white>tbody>tr>td{
+	text-align: left;
+	border: 0;
+	margin: 0;
+	padding: 0;
+	height: 20px;
+	padding-left: 10px;
+	font-size: 12px;
+	border-right: solid 1px #e6e6e6;
+    border-top: solid 1px #e6e6e6;
+    border-bottom: 1px solid #e6e6e6;
+}
+/*表格 e*/
