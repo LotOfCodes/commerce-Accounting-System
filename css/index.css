@@ -8,21 +8,24 @@
 	position: absolute;
 	width: 120px;
 	height: 100%;
-	background-color: #323131;	
+	background: #242934;
 	box-sizing: border-box;
 	z-index: 999;
+	box-shadow: 8px 0 24px rgba(15, 23, 42, 0.14);
 }
 .logo-wraper{
 	float: left;
 	width: 120px;
-	height: 52px;
-	margin-top: 10px;
+	height: 86px;
+	margin-top: 8px;
 	cursor: pointer;
+	position: relative;
 }
 .version{
-	float: left;
+	position: absolute;
+	top: 0;
+	right: 12px;
 	height: 12px;	
-	margin-left: 80px;
 	padding-left: 3px;
 	padding-right: 3px;
 	font-size: 12px;
@@ -32,13 +35,26 @@
 	background-color: white;
 	color: black;
 }
+.logo-mark{
+	float: left;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	margin: 18px 41px 0;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 8px;
+	background: linear-gradient(135deg, #3E7CFF, #16A34A);
+	color: white;
+	box-shadow: 0 10px 20px rgba(62, 124, 255, 0.22);
+}
 .logo-text{
 	float: left;
-	width: 100px;
-	height: 40px;
-	margin-left: 20px;
-	line-height: 40px;
-	font-size: 20px;
+	width: 120px;
+	height: 24px;
+	line-height: 24px;
+	font-size: 15px;
 	font-weight: bold;
 	text-align: center;
 	color: white;
@@ -46,22 +62,91 @@
 .left ul{
 	float: left;
 	width: 120px;
+	margin: 10px 0 0;
+	padding: 0 8px;
+	box-sizing: border-box;
 }
 .left ul li{
-	width: 120px;
-	height: 40px;
-	line-height: 40px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 104px;
+	height: 42px;
+	margin-bottom: 6px;
+	padding: 0 10px;
+	line-height: 42px;
 	font-size: 12px;	
-	text-align: center;
-	color: #BCBCBC;
+	text-align: left;
+	color: #C6CCD8;
 	cursor: pointer;
+	box-sizing: border-box;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
 }
 .left ul li:hover{
 	color: white;
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.08);
 }
 .left ul .activited{
-	background-color: #3E7CFF;
+	background: #3E7CFF;
 	color: white;
+	border-color: rgba(255, 255, 255, 0.16);
+	box-shadow: 0 10px 20px rgba(62, 124, 255, 0.24);
+}
+.admin-footer{
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	bottom: 10px;
+	padding-top: 10px;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.admin-name{
+	width: 100%;
+	margin-bottom: 7px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+	line-height: 18px;
+	color: #C6CCD8;
+	text-align: center;
+}
+.logout-button{
+	width: 100%;
+	height: 30px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.08);
+	color: white;
+	font-size: 12px;
+	cursor: pointer;
+}
+.logout-button:hover{
+	background: rgba(255, 255, 255, 0.15);
+}
+.nav-icon{
+	width: 16px;
+	height: 16px;
+	flex: 0 0 auto;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	fill: none;
+}
+.logo-mark .nav-icon{
+	width: 21px;
+	height: 21px;
+	stroke-width: 1.9;
+}
+.icon-sprite{
+	position: absolute;
+	width: 0;
+	height: 0;
+	overflow: hidden;
 }
 .right{
 	float: left;

@@ -1,4 +1,94 @@
+function ensureDateTimeSelector(){
+	if ($('.dateTimeSelector-wraper').length > 0) {
+		return;
+	}
+	$('body').append([
+		'<div class="dateTimeSelector-wraper">',
+		'<div class="left">',
+		'<div class="dateTimeSelector" bid="0">',
+		'<div class="dateTimeSelector-header">',
+		'<div class="month-slider">',
+		'<div class="slide-to-left"></div>',
+		'<div class="curr-date"></div>',
+		'<div class="slide-to-right"></div>',
+		'</div>',
+		'<div class="weeks">',
+		'<div class="week">一</div><div class="week">二</div><div class="week">三</div><div class="week">四</div><div class="week">五</div><div class="week">六</div><div class="week">日</div>',
+		'</div>',
+		'</div>',
+		'<div class="dates"></div>',
+		'<div class="time"><select class="clock"></select><div class="colon">:</div><select class="minute"></select><div class="colon">:</div><select class="second"></select></div>',
+		'</div>',
+		'</div>',
+		'<div class="right">',
+		'<div class="dateTimeSelector" bid="1">',
+		'<div class="dateTimeSelector-header">',
+		'<div class="month-slider">',
+		'<div class="slide-to-left"></div>',
+		'<div class="curr-date"></div>',
+		'<div class="slide-to-right"></div>',
+		'</div>',
+		'<div class="weeks">',
+		'<div class="week">一</div><div class="week">二</div><div class="week">三</div><div class="week">四</div><div class="week">五</div><div class="week">六</div><div class="week">日</div>',
+		'</div>',
+		'</div>',
+		'<div class="dates"></div>',
+		'<div class="time"><select class="clock"></select><div class="colon">:</div><select class="minute"></select><div class="colon">:</div><select class="second"></select></div>',
+		'</div>',
+		'</div>',
+		'<div class="butons"><div class="buton confirm-datetime">确定</div></div>',
+		'</div>'
+	].join(''));
+}
+function formatDisplayDate(year, month, day) {
+	return year + '-' + (month > 9 ? month : '0' + month) + '-' + (day > 9 ? day : '0' + day);
+}
+function getDateTimeSelectorTarget() {
+	return $('.dateTimeSelector-wraper').attr('target') || '#adddate';
+}
+function positionDateTimeSelector(targetElement) {
+	var target = $(targetElement);
+	var wraper = $('.dateTimeSelector-wraper');
+	var margin = 8;
+	var rect;
+	var left;
+	var top;
+	var wraperWidth;
+	var wraperHeight;
+	var viewportWidth;
+	var viewportHeight;
+
+	if (target.length === 0 || wraper.length === 0) {
+		return;
+	}
+
+	rect = target[0].getBoundingClientRect();
+	wraperWidth = wraper.outerWidth();
+	wraperHeight = wraper.outerHeight();
+	viewportWidth = $(window).width();
+	viewportHeight = $(window).height();
+	left = rect.left;
+	top = rect.bottom + margin;
+
+	if (left + wraperWidth + margin > viewportWidth) {
+		left = viewportWidth - wraperWidth - margin;
+	}
+
+	if (top + wraperHeight + margin > viewportHeight && rect.top - wraperHeight - margin >= margin) {
+		top = rect.top - wraperHeight - margin;
+	}
+
+	if (top + wraperHeight + margin > viewportHeight) {
+		top = viewportHeight - wraperHeight - margin;
+	}
+
+	left = Math.max(margin, left);
+	top = Math.max(margin, top);
+	wraper.css({'left': left + 'px', 'top': top + 'px'});
+}
+
 $(document).ready(function(){
+	ensureDateTimeSelector();
 	//初始化
 	var date1 = new Date();
 	var date2 = new Date();
@@ -15,17 +105,14 @@ $(document).ready(function(){
 			});
 			$(this).addClass('actived');
 			//目标容器
-			var target_ =  $('#adddate');
+			var target_ =  $(getDateTimeSelectorTarget());
 			var bid = $(this).parents('.dateTimeSelector').attr('bid');
 			var currdatebox = $(this).parents('.dateTimeSelector').find('.dateTimeSelector-header').find('.month-slider .curr-date');
 			
-			console.log(currdatebox.attr('month'));
 			var timebox_ = $(this).parents('.dateTimeSelector').find('.time');
-			console.log(timebox_.find('.clock').val());
 			var year = isNaN(currdatebox.attr('year'))?2000:parseInt(currdatebox.attr('year'));
 			var month = isNaN(currdatebox.attr('month'))?1:parseInt(currdatebox.attr('month'));
 			var day = isNaN($(this).html())?1:parseInt($(this).html());
-			console.log(currdatebox.attr('month'));
 			var hour = timebox_.find('.clock').val();
 			var minute = timebox_.find('.minute').val();
 			var second = timebox_.find('.second').val();
@@ -37,7 +124,7 @@ $(document).ready(function(){
 					target_.find('.start-datetime .date').attr('year',year);
 					target_.find('.start-datetime .date').attr('month',month);
 					target_.find('.start-datetime .date').attr('day',day);
-					target_.find('.start-datetime .date').html((month>9?month:'0'+month) + '-' +(day>9?day:'0'+day));
+					target_.find('.start-datetime .date').html(formatDisplayDate(year, month, day));
 					target_.find('.start-datetime .time').attr('hour',hour);
 					target_.find('.start-datetime .time').attr('minute',minute);
 					target_.find('.start-datetime .time').attr('second',second);
@@ -47,7 +134,7 @@ $(document).ready(function(){
 					target_.find('.end-datetime .date').attr('year',year);
 					target_.find('.end-datetime .date').attr('month',month);
 					target_.find('.end-datetime .date').attr('day',day);
-					target_.find('.end-datetime .date').html((month>9?month:'0'+month) + '-' +(day>9?day:'0'+day));
+					target_.find('.end-datetime .date').html(formatDisplayDate(year, month, day));
 					target_.find('.end-datetime .time').attr('hour',hour);
 					target_.find('.end-datetime .time').attr('minute',minute);
 					target_.find('.end-datetime .time').attr('second',second);
@@ -58,41 +145,21 @@ $(document).ready(function(){
 		}
 	});
 	//绑定弹出事件
-	$(document).on('click','.datetime-select',function(){
+	$(document).on('click','.datetime-select',function(event){
+		event.stopPropagation();
+		var targetSelector = $(this).attr('id') ? '#' + $(this).attr('id') : '#adddate';
+		$('.dateTimeSelector-wraper').attr('target', targetSelector);
 		$('.dateTimeSelector-wraper').show();
-		var x,y,h,b,t;
-		x = $(this).offset().left;
-		y = $(this).offset().top;
-		h = $(this).height();
-		t = $(this);
-		b = {};
-		b.t = function(){
-			var w=0;
-			try
-			{
-				w = parseInt(t.css("borderTopWidth"));
-			}catch(e){}			
-			return w;
-		}();
-		b.b = function(){
-			var w=0;
-			try
-			{
-				w = parseInt(t.css("borderBottomWidth"));
-			}catch(e){}			
-			return w;
-		}();
-		console.log('x:'+x+' y:'+y+' h:'+h+' b.t:'+b.t+' b.b:'+b.b);
-		$('.dateTimeSelector-wraper').css({'left':x+'px','top':y+h+b.t+b.b+'px'});
+		positionDateTimeSelector(this);
 	});
 	//confirm-datetime
 	$(document).on('click','.dateTimeSelector-wraper .confirm-datetime',function(){
-		setDateTime('#adddate');
+		setDateTime(getDateTimeSelectorTarget());
 		$('.dateTimeSelector-wraper').hide();
 	});
 	//时间选择器
 	$(document).on('change','.dateTimeSelector .time select',function(){
-		setDateTime('#adddate');
+		setDateTime(getDateTimeSelectorTarget());
 	});
 	//前进月份
 	$(document).on('click','.dateTimeSelector-wraper .slide-to-right',function(){
@@ -106,14 +173,11 @@ $(document).ready(function(){
 		if (curr_month===12)
 		{
 			newDateTime = (curr_year+1) + '-' + '01' + '-01';	
-			console.log(newDateTime);
 		}
 		if (curr_month!==12)
 		{
 			newDateTime = curr_year + '-' + ((curr_month+1).toString().length>1?(curr_month+1):'0'+(curr_month+1)) + '-01';			
 		}
-		
-		//console.log('m'+curr_month+'y'+curr_year);
 		
 		if (bid==='0')
 		{
@@ -136,14 +200,11 @@ $(document).ready(function(){
 		if (curr_month===1)
 		{
 			newDateTime = (curr_year-1) + '-' + '12' + '-01';	
-			console.log(newDateTime);
 		}
 		if (curr_month!==1)
 		{
 			newDateTime = curr_year + '-' + ((curr_month-1).toString().length>1?(curr_month-1):'0'+(curr_month-1)) + '-01';			
 		}
-		
-		//console.log('m'+curr_month+'y'+curr_year);
 		
 		if (bid==='0')
 		{
@@ -169,6 +230,13 @@ $(document).ready(function(){
 			$('.dateTimeSelector-wraper').hide();
 		}		
 	});
+	$(window).on('resize scroll', function(){
+		var wraper = $('.dateTimeSelector-wraper');
+		var target = getDateTimeSelectorTarget();
+		if (wraper.is(':visible') && $(target).length > 0) {
+			positionDateTimeSelector(target);
+		}
+	});
 });
 //时间赋值
 function setDateTime(targetElement_){	
@@ -190,7 +258,7 @@ function setDateTime(targetElement_){
 	target_.find('.start-datetime .date').attr('year',year1);
 	target_.find('.start-datetime .date').attr('month',month1);
 	target_.find('.start-datetime .date').attr('day',day1);
-	target_.find('.start-datetime .date').html((month1>9?month1:'0'+month1) + '-' +(day1>9?day1:'0'+day1));
+	target_.find('.start-datetime .date').html(formatDisplayDate(year1, month1, day1));
 	target_.find('.start-datetime .time').attr('hour',hour1);
 	target_.find('.start-datetime .time').attr('minute',minute1);
 	target_.find('.start-datetime .time').attr('second',second1);
@@ -199,20 +267,20 @@ function setDateTime(targetElement_){
 	target_.find('.end-datetime .date').attr('year',year2);
 	target_.find('.end-datetime .date').attr('month',month2);
 	target_.find('.end-datetime .date').attr('day',day2);
-	target_.find('.end-datetime .date').html((month2>9?month2:'0'+month2) + '-' +(day2>9?day2:'0'+day2));
+	target_.find('.end-datetime .date').html(formatDisplayDate(year2, month2, day2));
 	target_.find('.end-datetime .time').attr('hour',hour2);
 	target_.find('.end-datetime .time').attr('minute',minute2);
 	target_.find('.end-datetime .time').attr('second',second2);
 	target_.find('.end-datetime .time').html(hour2+':'+minute2+':'+second2);
 }
-function initialization_ds(date1,date2)
+function initialization_ds(date1,date2,targetElement_)
 {
 	'use strict';
 	fillTimeSelector();
 	fillLeftBox(date1);
 	fillRightBox(date2);
 	//目标容器
-		var target_ = $('#adddate');
+		var target_ = $(targetElement_ || '#adddate');
 		var year1   = date1.getFullYear();
 		var month1  = parseInt(date1.getMonth().toString())+1;
 		var day1    = date1.getDate();
@@ -229,7 +297,7 @@ function initialization_ds(date1,date2)
 		target_.find('.start-datetime .date').attr('year',year1);
 		target_.find('.start-datetime .date').attr('month',month1);
 		target_.find('.start-datetime .date').attr('day',day1);
-		target_.find('.start-datetime .date').html((month1>9?month1:'0'+month1) + '-' +(day1>9?day1:'0'+day1));
+		target_.find('.start-datetime .date').html(formatDisplayDate(year1, month1, day1));
 		target_.find('.start-datetime .time').attr('hour',hour1);
 		target_.find('.start-datetime .time').attr('minute',minute1);
 		target_.find('.start-datetime .time').attr('second',second1);
@@ -238,7 +306,7 @@ function initialization_ds(date1,date2)
 		target_.find('.end-datetime .date').attr('year',year2);
 		target_.find('.end-datetime .date').attr('month',month2);
 		target_.find('.end-datetime .date').attr('day',day2);
-		target_.find('.end-datetime .date').html((month2>9?month2:'0'+month2) + '-' +(day2>9?day2:'0'+day2));
+		target_.find('.end-datetime .date').html(formatDisplayDate(year2, month2, day2));
 		target_.find('.end-datetime .time').attr('hour',hour2);
 		target_.find('.end-datetime .time').attr('minute',minute2);
 		target_.find('.end-datetime .time').attr('second',second2);
@@ -302,7 +370,6 @@ function getDays(moth,year)
 function getWeek(date_)
 {
 	var curDate = date_;	
-	//console.log(curDate.getFullYear());
 	return curDate.getDay();
 }
 
@@ -342,9 +409,6 @@ function fillLeftBox(date_)
 	}();	
 	//获取当月第一天星期几
 	var week = getWeek(new Date(date_.getFullYear().toString() + '-' + (month>9?month.toString():'0'+month) + '-' + '01'));
-	console.log('月：'+month);
-	console.log('天数：'+days);
-	console.log('星期：'+week);
 	week = (week===0)?7:week;
 	//清空日期
 	$('.dateTimeSelector-wraper .left').find('.dates').html('');
@@ -434,8 +498,6 @@ function fillRightBox(date_)
 	}();	
 	//获取当月第一天星期几
 	var week = getWeek(new Date(date_.getFullYear().toString() + '-' + (month>9?month.toString():'0'+month) + '-' + '01'));
-	console.log('月：'+month);
-	console.log('星期：'+week);
 	week = (week===0)?7:week;
 	//清空日期
 	$('.dateTimeSelector-wraper .right').find('.dates').html('');

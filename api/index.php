@@ -3,9 +3,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-require_once 'ParentProduct.php';
-require_once 'Product.php';
-require_once 'Order.php';
+require_once 'base/parentProduct.php';
+require_once 'base/order.php';
 require_once 'ini.php';
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: *');

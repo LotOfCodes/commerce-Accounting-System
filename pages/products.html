@@ -4,472 +4,568 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>产品列表</title>
+<link rel="stylesheet" href="../css/dateTimeSelector.css">
 <style>
-	:root {
-		--bg: #f3f6fb;
-		--panel: #fff;
-		--line: #dfe5ef;
-		--line-soft: #edf1f7;
-		--text: #1f2937;
-		--muted: #6b7280;
-		--blue: #3e7cff;
-		--blue-dark: #2f6dec;
-		--green: #13a66b;
-		--red: #d93025;
-	}
-	* {
-		box-sizing: border-box;
-	}
-	html,
-	body {
-		width: 100%;
-		height: 100%;
-		margin: 0;
-		font-family: Arial, "Microsoft YaHei", sans-serif;
-		background: var(--bg);
-		color: var(--text);
-	}
-	button,
-	input,
-	select {
-		font-family: inherit;
-	}
-	.products-page {
-		min-height: 100%;
-		padding: 14px 14px 76px;
-	}
-	.toolbar {
-		background: var(--panel);
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		padding: 14px;
-		box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
-	}
-	.summary-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		margin-bottom: 12px;
-	}
-	.page-title {
-		margin: 0;
-		font-size: 20px;
-		line-height: 28px;
-	}
-	.product-count {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		min-height: 28px;
-		padding: 0 10px;
-		border-radius: 6px;
-		background: #eef4ff;
-		color: var(--blue);
-		font-size: 13px;
-		font-weight: 700;
-	}
-	.filter-grid {
-		display: grid;
-		grid-template-columns: repeat(5, minmax(140px, 1fr));
-		gap: 10px;
-	}
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-		min-width: 0;
-	}
-	.field label {
-		font-size: 12px;
-		color: var(--muted);
-	}
-	.field input,
-	.field select {
-		width: 100%;
-		height: 34px;
-		padding: 0 10px;
-		border: 1px solid var(--line);
-		border-radius: 6px;
-		outline: 0;
-		background: #fff;
-		color: var(--text);
-		font-size: 13px;
-	}
-	.field input:focus,
-	.field select:focus {
-		border-color: var(--blue);
-		box-shadow: 0 0 0 3px rgba(62, 124, 255, 0.12);
-	}
-	.filter-actions {
-		display: flex;
-		align-items: flex-end;
-		gap: 8px;
-	}
-	.btn {
-		height: 34px;
-		padding: 0 14px;
-		border: 1px solid var(--line);
-		border-radius: 6px;
-		background: #fff;
-		color: var(--text);
-		font-size: 13px;
-		cursor: pointer;
-		white-space: nowrap;
-	}
-	.btn:hover {
-		border-color: var(--blue);
-		color: var(--blue);
-	}
-	.btn.primary {
-		border-color: var(--blue);
-		background: var(--blue);
-		color: #fff;
-	}
-	.btn.primary:hover {
-		background: var(--blue-dark);
-		color: #fff;
-	}
-	.table-panel {
-		margin-top: 14px;
-		background: var(--panel);
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		overflow: hidden;
-		box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
-	}
-	.table-scroll {
-		width: 100%;
-		overflow: auto;
-	}
-	.products-table {
-		width: 100%;
-		min-width: 1040px;
-		border-collapse: collapse;
-	}
-	.products-table th,
-	.products-table td {
-		border-bottom: 1px solid var(--line-soft);
-		padding: 12px;
-		text-align: left;
-		vertical-align: top;
-		font-size: 13px;
-	}
-	.products-table th {
-		position: sticky;
-		top: 0;
-		z-index: 1;
-		background: #f8fafc;
-		color: #4b5563;
-		font-weight: 700;
-	}
-	.products-table tbody tr:hover {
-		background: #fbfdff;
-	}
-	.check-cell {
-		width: 44px;
-		text-align: center;
-	}
-	.product-name {
-		font-weight: 700;
-		font-size: 14px;
-	}
-	.rule-code {
-		display: inline-block;
-		max-width: 280px;
-		padding: 4px 7px;
-		border: 1px solid #dbe7ff;
-		border-radius: 5px;
-		background: #f7faff;
-		color: #1d4ed8;
-		font-family: Consolas, "Courier New", monospace;
-		font-size: 12px;
-		line-height: 18px;
-		word-break: break-all;
-	}
-	.meta-stack {
-		display: grid;
-		gap: 7px;
-	}
-	.meta-line {
-		display: flex;
-		align-items: flex-start;
-		gap: 6px;
-		line-height: 20px;
-	}
-	.meta-label {
-		flex: 0 0 auto;
-		color: var(--muted);
-	}
-	.meta-value {
-		min-width: 0;
-		word-break: break-all;
-	}
-	.price {
-		font-weight: 700;
-		color: var(--red);
-	}
-	.tag {
-		display: inline-flex;
-		align-items: center;
-		min-height: 24px;
-		padding: 0 8px;
-		border-radius: 999px;
-		background: #e8f8f1;
-		color: var(--green);
-		font-size: 12px;
-		font-weight: 700;
-	}
-	.action-group {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-	.link-btn {
-		height: 28px;
-		padding: 0 10px;
-		border: 1px solid #cfe0ff;
-		border-radius: 5px;
-		background: #f3f7ff;
-		color: var(--blue);
-		font-size: 12px;
-		cursor: pointer;
-	}
-	.link-btn.danger {
-		border-color: #ffd9d6;
-		background: #fff5f4;
-		color: #d93025;
-	}
-	.pagination {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 8px;
-		padding: 12px;
-		color: var(--muted);
-		font-size: 13px;
-	}
-	.page-num {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 30px;
-		height: 30px;
-		border-radius: 6px;
-		background: var(--blue);
-		color: #fff;
-		font-weight: 700;
-	}
-	.bottom-tools {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		justify-content: center;
-		gap: 8px;
-		padding: 12px 14px;
-		background: rgba(31, 41, 55, 0.86);
-		backdrop-filter: blur(8px);
-	}
-	.bottom-tools .btn {
-		border-color: rgba(255, 255, 255, 0.2);
-		background: rgba(255, 255, 255, 0.1);
-		color: #fff;
-	}
-	.bottom-tools .btn:hover {
-		border-color: #fff;
-		color: #fff;
-	}
-	.toast {
-		position: fixed;
-		left: 50%;
-		bottom: 76px;
-		transform: translateX(-50%);
-		display: none;
-		padding: 9px 14px;
-		border-radius: 6px;
-		background: rgba(17, 24, 39, 0.92);
-		color: #fff;
-		font-size: 13px;
-	}
-	.toast.show {
-		display: block;
-	}
-	@media (max-width: 1000px) {
-		.filter-grid {
-			grid-template-columns: repeat(3, minmax(140px, 1fr));
-		}
-	}
-	@media (max-width: 720px) {
-		.products-page {
-			padding: 10px 10px 88px;
-		}
-		.summary-row {
-			align-items: flex-start;
-			flex-direction: column;
-		}
-		.filter-grid {
-			grid-template-columns: 1fr;
-		}
-		.filter-actions,
-		.bottom-tools {
-			flex-wrap: wrap;
-		}
-		.filter-actions .btn {
-			flex: 1 1 120px;
-		}
-	}
+:root{--bg:#f3f6fb;--panel:#fff;--line:#dfe5ef;--line-soft:#edf1f7;--text:#1f2937;--muted:#6b7280;--blue:#3e7cff;--blue-dark:#2f6dec;--green:#13a66b;--red:#d93025;--amber:#b7791f}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;font-family:Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}button,input,select{font-family:inherit}.products-page{min-height:100%;padding:14px 14px 76px}.toolbar,.table-panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,41,55,.06)}.toolbar{padding:14px}.summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.page-title{margin:0;font-size:20px;line-height:28px}.product-count{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:6px;background:#eef4ff;color:var(--blue);font-size:13px;font-weight:700}.filter-grid{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:10px}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:12px;color:var(--muted)}.field input,.field select{width:100%;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;outline:0;background:#fff;color:var(--text);font-size:13px}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(62,124,255,.12)}.merchant-bind-list{display:grid;gap:8px}.merchant-bind-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.merchant-bind-actions{display:flex;justify-content:flex-start}.datetime-select{display:inline-flex;align-items:center;width:100%;min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--text);font-size:13px;cursor:pointer;user-select:none}.datetime-select:hover{border-color:var(--blue)}.datetime-select .start-datetime,.datetime-select .end-datetime{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.datetime-select .time-line{width:22px;height:1px;margin:0 9px;background:var(--line)}.datetime-select .date{font-weight:700}.datetime-select .time{color:var(--muted)}.filter-actions,.action-group,.bottom-tools,.pagination,.dialog-head,.dialog-actions{display:flex;align-items:center;gap:8px}.filter-actions{align-items:flex-end}.btn,.link-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--text);cursor:pointer;white-space:nowrap}.btn{height:34px;padding:0 14px;border-radius:6px;font-size:13px}.link-btn{height:28px;padding:0 10px;border-color:#cfe0ff;border-radius:5px;background:#f3f7ff;color:var(--blue);font-size:12px}.btn:hover,.link-btn:hover{border-color:var(--blue);color:var(--blue)}.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn.primary:hover{background:var(--blue-dark);color:#fff}.btn.danger,.link-btn.danger{border-color:#ffd9d6;background:#fff5f4;color:var(--red)}.icon{width:15px;height:15px;flex:0 0 auto;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}.table-panel{margin-top:14px;overflow:hidden}.table-scroll{width:100%;overflow:auto}.products-table{width:100%;min-width:1120px;border-collapse:collapse}.products-table th,.products-table td{border-bottom:1px solid var(--line-soft);padding:12px;text-align:left;vertical-align:top;font-size:13px}.products-table th{position:sticky;top:0;z-index:1;background:#f8fafc;color:#4b5563;font-weight:700}.products-table tbody tr:hover{background:#fbfdff}.products-table tbody tr.is-selected{background:#f2f7ff}.check-cell{width:44px;text-align:center}.product-name{font-weight:700;font-size:14px}.rule-code{display:inline-block;max-width:280px;padding:4px 7px;border:1px solid #dbe7ff;border-radius:5px;background:#f7faff;color:#1d4ed8;font-family:Consolas,"Courier New",monospace;font-size:12px;line-height:18px;word-break:break-all}.meta-stack{display:grid;gap:7px}.meta-line{display:flex;align-items:flex-start;gap:6px;line-height:20px}.meta-label{flex:0 0 auto;color:var(--muted)}.meta-value{min-width:0;word-break:break-all}.price{font-weight:700;color:var(--red)}.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:999px;background:#e8f8f1;color:var(--green);font-size:12px;font-weight:700}.tag.muted{background:#f3f4f6;color:var(--muted)}.tag.warn{background:#fff7e6;color:var(--amber)}.empty-row td,.loading-row td{padding:28px 12px;text-align:center;color:var(--muted)}.pagination{justify-content:flex-end;padding:12px;color:var(--muted);font-size:13px}.page-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:var(--blue);color:#fff;font-weight:700}.bottom-tools{position:fixed;left:0;right:0;bottom:0;justify-content:center;padding:12px 14px;background:rgba(31,41,55,.86);backdrop-filter:blur(8px)}.bottom-tools .btn{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff}.bottom-tools .btn:hover{border-color:#fff;color:#fff}.modal-backdrop{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.48)}.modal-backdrop.show{display:flex}.product-dialog{width:min(860px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:8px;background:#fff;box-shadow:0 18px 50px rgba(15,23,42,.26)}.dialog-head,.dialog-actions{justify-content:space-between;padding:14px;border-bottom:1px solid var(--line-soft)}.dialog-actions{justify-content:flex-end;border-top:1px solid var(--line-soft);border-bottom:0}.dialog-title{margin:0;font-size:18px;line-height:26px}.product-form{padding:14px}.form-grid{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:12px}.form-grid .wide{grid-column:span 3}.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);z-index:30;display:none;padding:9px 14px;border-radius:6px;background:rgba(17,24,39,.92);color:#fff;font-size:13px}.toast.show{display:block}@media(max-width:1000px){.filter-grid{grid-template-columns:repeat(3,minmax(140px,1fr))}.form-grid{grid-template-columns:repeat(2,minmax(160px,1fr))}.form-grid .wide{grid-column:span 2}}@media(max-width:720px){.products-page{padding:10px 10px 88px}.summary-row{align-items:flex-start;flex-direction:column}.filter-grid,.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.filter-actions,.bottom-tools,.pagination{flex-wrap:wrap}.filter-actions .btn,.bottom-tools .btn{flex:1 1 120px}.merchant-bind-row{grid-template-columns:1fr}.datetime-select{height:auto;align-items:flex-start;flex-direction:column;gap:6px;padding:8px 10px}.datetime-select .time-line{width:100%;margin:0}}
+	.rule-editor{display:grid;gap:10px}
+	.products-table th:nth-child(5),.products-table td:nth-child(5){width:180px;max-width:180px;white-space:normal}
+	.products-table td:nth-child(5){overflow-wrap:anywhere;word-break:break-word}
+	.products-table td:nth-child(5) .rule-code{display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+	.products-table td:nth-child(5) .rule-code+.rule-code{margin-top:6px}
+	.rule-toolbar,.rule-test-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+	.rule-symbols{display:flex;flex-wrap:wrap;gap:6px}
+	.rule-symbol{height:28px;padding:0 9px;border:1px solid #cfe0ff;border-radius:5px;background:#f3f7ff;color:var(--blue);font-family:Consolas,"Courier New",monospace;font-size:12px;cursor:pointer}
+	.rule-symbol:hover{border-color:var(--blue)}
+	.rule-list{display:grid;gap:8px}
+	.rule-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:start}
+	.rule-input{width:100%;min-height:34px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;outline:0;background:#fff;color:var(--text);font-family:Consolas,"Courier New",monospace;font-size:13px;line-height:18px;resize:vertical}
+	.rule-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(62,124,255,.12)}
+	.rule-status{min-height:20px;color:var(--muted);font-size:12px;line-height:20px}
+	.rule-status.ok{color:var(--green)}
+	.rule-status.warn{color:var(--amber)}
+	.rule-status.error{color:var(--red)}
+	.rule-actions{display:flex;gap:6px}
+	.rule-test-row input{flex:1 1 260px;min-width:180px}
+	.rule-test-result{display:grid;gap:6px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:6px;background:#fbfdff;color:var(--muted);font-size:12px;line-height:20px}
+	.rule-test-result .ok{color:var(--green)}
+	.rule-test-result .warn{color:var(--amber)}
+	.rule-test-result .error{color:var(--red)}
+	@media(max-width:720px){.rule-row{grid-template-columns:1fr}.rule-actions{flex-wrap:wrap}}
 </style>
 </head>
 <body>
-	<div class="products-page">
-		<section class="toolbar">
-			<div class="summary-row">
-				<h1 class="page-title">产品列表</h1>
-				<div class="product-count">产品总数：<span id="productCount">1</span></div>
-			</div>
-			<div class="filter-grid">
-				<div class="field">
-					<label for="keyword">产品名称</label>
-					<input id="keyword" type="text" placeholder="输入产品名称">
-				</div>
-				<div class="field">
-					<label for="shippingFilter">是否包邮</label>
-					<select id="shippingFilter">
-						<option value="">全部</option>
-						<option value="yes">包邮</option>
-						<option value="no">不包邮</option>
-					</select>
-				</div>
-				<div class="field">
-					<label for="statusFilter">状态</label>
-					<select id="statusFilter">
-						<option value="">全部状态</option>
-						<option value="active">有效</option>
-						<option value="expired">已过期</option>
-					</select>
-				</div>
-				<div class="field">
-					<label for="startDate">有效期开始</label>
-					<input id="startDate" type="date" value="2025-03-03">
-				</div>
-				<div class="filter-actions">
-					<button class="btn primary" type="button" id="searchButton">搜索</button>
-					<button class="btn" type="button" id="resetButton">重置</button>
-				</div>
-			</div>
-		</section>
-
-		<section class="table-panel">
-			<div class="table-scroll">
-				<table class="products-table">
-					<thead>
-						<tr>
-							<th class="check-cell"><input type="checkbox" aria-label="全选"></th>
-							<th>产品名称</th>
-							<th>匹配规则</th>
-							<th>价格信息</th>
-							<th>是否包邮</th>
-							<th>有效期</th>
-							<th>操作</th>
-						</tr>
-					</thead>
-					<tbody id="productsList">
-						<tr data-product-id="PROD202503030001">
-							<td class="check-cell"><input type="checkbox" aria-label="选择产品 荔枝 2 年苗 1 棵装"></td>
-							<td>
-								<div class="product-name">荔枝 2 年苗 1 棵装</div>
-							</td>
-							<td>
-								<span class="rule-code">荔枝苗.*(1|一)(棵|颗)</span>
-							</td>
-							<td>
-								<div class="meta-stack">
-									<div class="meta-line">
-										<span class="meta-label">单价价格：</span>
-										<span class="meta-value price">￥58.00</span>
-									</div>
-									<div class="meta-line">
-										<span class="meta-label">多件价格：</span>
-										<span class="meta-value price">2 件 ￥108.00 / 3 件 ￥156.00</span>
-									</div>
-								</div>
-							</td>
-							<td><span class="tag">包邮</span></td>
-							<td>
-								<div class="meta-stack">
-									<div class="meta-line">
-										<span class="meta-label">开始：</span>
-										<span class="meta-value">2025 03-03 00:00</span>
-									</div>
-									<div class="meta-line">
-										<span class="meta-label">结束：</span>
-										<span class="meta-value">2025 03-04 00:00</span>
-									</div>
-								</div>
-							</td>
-							<td>
-								<div class="action-group">
-									<button class="link-btn" type="button">编辑</button>
-									<button class="link-btn danger" type="button">删除</button>
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="pagination">
-				<span>共 1 条</span>
-				<button class="btn" type="button">上一页</button>
-				<span class="page-num">1</span>
-				<button class="btn" type="button">下一页</button>
-			</div>
-		</section>
-	</div>
-
-	<div class="bottom-tools">
-		<button class="btn" type="button">添加产品</button>
-		<button class="btn" type="button">批量删除</button>
-		<button class="btn" type="button">导入表格</button>
-		<button class="btn" type="button">导出表格</button>
-	</div>
-	<div class="toast" id="toast">当前为演示数据</div>
-
+<svg class="icon-sprite" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 21h14"></path></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></symbol></svg>
+<div class="products-page"><section class="toolbar"><div class="summary-row"><h1 class="page-title">产品列表</h1><div class="product-count">产品总数：<span id="productCount">0</span></div></div><div class="filter-grid"><div class="field"><label for="keyword">产品名称</label><input id="keyword" type="text" placeholder="输入产品名称"></div><div class="field"><label for="shippingFilter">是否包邮</label><select id="shippingFilter"><option value="">全部</option><option value="yes">包邮</option><option value="no">不包邮</option></select></div><div class="field"><label for="statusFilter">状态</label><select id="statusFilter"><option value="">全部状态</option><option value="active">有效</option><option value="expired">已过期</option></select></div><div class="field"><label for="filterDateRange">有效期范围</label><div class="datetime-select" id="filterDateRange" data-active="0"><div class="start-datetime"><div class="date" year="2026" month="7" day="1">2026-07-01</div><div class="time" hour="00" minute="00" second="00">00:00:00</div></div><div class="time-line"></div><div class="end-datetime"><div class="date" year="2026" month="7" day="3">2026-07-03</div><div class="time" hour="23" minute="59" second="59">23:59:59</div></div></div></div><div class="filter-actions"><button class="btn primary" type="button" id="searchButton"><svg class="icon"><use href="#i-search"></use></svg>搜索</button><button class="btn" type="button" id="resetButton"><svg class="icon"><use href="#i-refresh"></use></svg>重置</button></div></div></section>
+<section class="table-panel"><div class="table-scroll"><table class="products-table"><thead><tr><th class="check-cell"><input type="checkbox" id="checkAll" aria-label="全选"></th><th>产品名称</th><th>绑定商家</th><th>重量</th><th>表达式匹配规则</th><th>价格信息</th><th>是否包邮</th><th>有效期</th><th>操作</th></tr></thead><tbody id="productsList"><tr class="loading-row"><td colspan="9">正在获取产品数据...</td></tr></tbody></table></div><div class="pagination"><span id="paginationTotal">共 0 条</span><select class="btn" id="pageSizeSelect" aria-label="每页条数"><option value="20">20 条/页</option><option value="50" selected>50 条/页</option><option value="100">100 条/页</option><option value="200">200 条/页</option></select><button class="btn" type="button" id="prevPage">上一页</button><span class="page-num" id="currentPage">1</span><button class="btn" type="button" id="nextPage">下一页</button></div></section></div>
+<div class="bottom-tools"><button class="btn" type="button" id="addProductButton"><svg class="icon"><use href="#i-plus"></use></svg>添加产品</button><button class="btn" type="button" id="batchDeleteButton"><svg class="icon"><use href="#i-trash"></use></svg>批量删除</button><button class="btn" type="button" id="importButton"><svg class="icon"><use href="#i-upload"></use></svg>导入表格</button><button class="btn" type="button" id="exportButton"><svg class="icon"><use href="#i-download"></use></svg>导出表格</button></div>
+<div class="modal-backdrop" id="productModal"><div class="product-dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 class="dialog-title" id="dialogTitle">添加产品</h2><button class="btn" type="button" id="closeModalButton"><svg class="icon"><use href="#i-x"></use></svg>关闭</button></div><form class="product-form" id="productForm"><input type="hidden" id="productId"><div class="form-grid"><div class="field wide"><label for="productName">产品名称</label><input id="productName" type="text" autocomplete="off"></div><div class="field wide"><label>绑定商家</label><div class="merchant-bind-list" id="productMerchantRows"></div><div class="merchant-bind-actions"><button class="link-btn" type="button" id="addProductMerchant"><svg class="icon"><use href="#i-plus"></use></svg>添加商家</button></div></div><div class="field"><label for="productPrice">单价价格</label><input id="productPrice" type="number" min="0" step="0.01"></div><div class="field"><label for="productMPrice">多件价格</label><input id="productMPrice" type="text" autocomplete="off"></div><div class="field"><label for="productRemotePrice">偏远运费</label><input id="productRemotePrice" type="number" min="0" step="0.01"></div><div class="field"><label for="productPackPrice">包装费</label><input id="productPackPrice" type="number" min="0" step="0.01"></div><div class="field"><label for="productExpressPayer">运费承担</label><select id="productExpressPayer"><option value="">未设置</option><option value="包邮">包邮</option><option value="不包邮">不包邮</option><option value="商家承担">商家承担</option><option value="买家承担">买家承担</option></select></div><div class="field"><label for="productWeight">重量</label><input id="productWeight" type="text" autocomplete="off"></div><div class="field wide"><label>表达式匹配规则</label><div class="rule-editor"><div class="rule-toolbar"><button class="link-btn" type="button" id="addRuleButton"><svg class="icon"><use href="#i-plus"></use></svg>添加规则</button><button class="link-btn" type="button" id="escapeRuleButton">普通文本转义</button><div class="rule-symbols" id="ruleSymbols"></div></div><div class="rule-list" id="productMatchRules"></div><input id="productMatchRule" type="hidden"><div class="rule-test-row"><input id="ruleTestText" type="text" autocomplete="off" placeholder="输入商品名测试匹配"><button class="link-btn" type="button" id="testRuleButton">测试规则</button></div><div class="rule-test-result" id="ruleTestResult">未测试</div></div></div><div class="field wide"><label for="adddate">有效期</label><div class="datetime-select" id="adddate"><div class="start-datetime"><div class="date" year="2026" month="7" day="1">2026-07-01</div><div class="time" hour="00" minute="00" second="00">00:00:00</div></div><div class="time-line"></div><div class="end-datetime"><div class="date" year="2026" month="7" day="3">2026-07-03</div><div class="time" hour="23" minute="59" second="59">23:59:59</div></div></div></div></div><div class="dialog-actions"><button class="btn primary" type="submit" id="saveProductButton"><svg class="icon"><use href="#i-save"></use></svg>保存</button></div></form></div></div>
+<div class="toast" id="toast">产品数据已更新</div>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/format-template.js"></script>
+<script src="../js/dateTimeSelector.js"></script>
 <script>
-	(function () {
-		var toast = document.getElementById('toast');
-		var keyword = document.getElementById('keyword');
-		var shippingFilter = document.getElementById('shippingFilter');
-		var statusFilter = document.getElementById('statusFilter');
-		var startDate = document.getElementById('startDate');
+(function(){
+	'use strict';
+	var API_BASE='../api';
+	var products=[];
+	var filteredProducts=[];
+	var merchants=[];
+	var currentPage=1;
+	var pageSize=50;
+	var toast=document.getElementById('toast');
+	var modal=document.getElementById('productModal');
+	var activeRuleInput=null;
 
-		function showToast(text) {
-			toast.textContent = text;
-			toast.classList.add('show');
-			window.clearTimeout(showToast.timer);
-			showToast.timer = window.setTimeout(function () {
-				toast.classList.remove('show');
-			}, 1400);
+	function icon(id){return '<svg class="icon" aria-hidden="true"><use href="#'+id+'"></use></svg>'}
+	function showToast(text){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(function(){toast.classList.remove('show')},1600)}
+	function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+	function getToken(){try{return (JSON.parse(localStorage.getItem('orders-token')||'{}').token||'').trim()}catch(e){return ''}}
+	function requestJson(endpoint,payload){return fetch(API_BASE+endpoint,{method:'POST',headers:{'Content-Type':'application/json;charset=UTF-8','token':getToken()},body:JSON.stringify(payload||{}),redirect:'follow'}).then(function(res){return res.json()})}
+	function first(p,keys){for(var i=0;i<keys.length;i++){if(p[keys[i]]!=null&&p[keys[i]]!=='')return p[keys[i]]}return ''}
+	function pname(p){return first(p,['productName'])}
+	function merchantLabel(m){var code=m.mid||'';var name=m.merchantName||'';return code&&name?code+' - '+name:(name||code||'-')}
+	function merchantIds(p){return String(p&&p.merchantIds||'').split(',').map(function(id){return id.trim()}).filter(Boolean)}
+	function splitRules(value){return String(value||'').split(/\r?\n/).map(function(rule){return rule.trim()}).filter(Boolean)}
+	function joinRules(){return Array.prototype.map.call(document.querySelectorAll('#productMatchRules .rule-input'),function(input){return input.value.trim()}).filter(Boolean).join('\n')}
+	function escapeRegex(value){return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+	function regexWarning(rule){
+		if(rule.indexOf('.*')>-1||rule.indexOf('.+')>-1)return '范围较宽，可能匹配过多商品';
+		if(/^\^.*\$$/.test(rule))return '';
+		if(/[|()[\]{}+*?.\\^$]/.test(rule))return '';
+		return '普通文本建议先转义，避免符号被当作正则语法';
+	}
+	function hasEmptyAlternative(rule){
+		var inClass=false;
+		var escaped=false;
+		for(var i=0;i<rule.length;i++){
+			var ch=rule.charAt(i);
+			if(escaped){escaped=false;continue}
+			if(ch==='\\'){escaped=true;continue}
+			if(ch==='['){inClass=true;continue}
+			if(ch===']'){inClass=false;continue}
+			if(inClass||ch!=='|')continue;
+			if(i===0||i===rule.length-1)return true;
+			var before=rule.charAt(i-1);
+			var after=rule.charAt(i+1);
+			if(before==='|'||before==='('||after==='|'||after===')')return true;
 		}
-
-		document.getElementById('searchButton').addEventListener('click', function () {
-			showToast('当前为演示数据');
+		return false;
+	}
+	function compileRule(rule){
+		try{return {regex:new RegExp(rule,'i')}}
+		catch(e){return {error:e.message||'表达式格式错误'}}
+	}
+	function ruleMatchesSku(rule, sku){
+		var compiled=compileRule(rule);
+		if(compiled.error)return false;
+		var text=String(sku||'');
+		var normalized=text.toLowerCase().replace(/\s+/g,'');
+		return compiled.regex.test(text)||compiled.regex.test(normalized);
+	}
+	function renderRuleCode(value){
+		var rules=splitRules(value);
+		if(!rules.length)return '-';
+		return rules.map(function(rule){return '<span class="rule-code">'+esc(rule)+'</span>'}).join(' ');
+	}
+	function ruleRowHtml(rule){
+		return '<div class="rule-row"><textarea class="rule-input" rows="1" autocomplete="off" spellcheck="false">'+esc(rule||'')+'</textarea><div class="rule-actions"><button class="link-btn escape-one-rule" type="button">转义</button><button class="link-btn danger remove-rule" type="button">'+icon('i-trash')+'删除</button></div><div class="rule-status">未校验</div></div>';
+	}
+	function renderRuleSymbols(){
+		var symbols=[
+			{value:'.*',title:'匹配任意字符 0 次或多次，常用于中间任意内容'},
+			{value:'.+',title:'匹配任意字符 1 次或多次，要求至少有内容'},
+			{value:'\\d+',title:'匹配一个或多个数字'},
+			{value:'\\s*',title:'匹配 0 个或多个空格、换行等空白字符'},
+			{value:'^',title:'匹配文本开头'},
+			{value:'$',title:'匹配文本结尾'},
+			{value:'|',title:'或者，例如 苹果|香蕉 表示匹配苹果或香蕉'},
+			{value:'()',title:'分组，把一段规则作为整体'},
+			{value:'[]',title:'字符集合，匹配其中任意一个字符'},
+			{value:'{}',title:'次数范围，例如 {2,4} 表示重复 2 到 4 次'},
+			{value:'?',title:'前一项可有可无，重复 0 或 1 次'},
+			{value:'+',title:'前一项重复 1 次或多次'},
+			{value:'*',title:'前一项重复 0 次或多次'}
+		];
+		document.getElementById('ruleSymbols').innerHTML=symbols.map(function(symbol){return '<button class="rule-symbol" type="button" data-symbol="'+esc(symbol.value)+'" title="'+esc(symbol.title)+'">'+esc(symbol.value)+'</button>'}).join('');
+	}
+	function addRuleRow(rule){
+		document.getElementById('productMatchRules').insertAdjacentHTML('beforeend',ruleRowHtml(rule||''));
+		setActiveRuleInput(document.querySelector('#productMatchRules .rule-row:last-child .rule-input'));
+		updateRuleRemoveState();
+		validateRules();
+	}
+	function setRuleRows(value){
+		var rules=splitRules(value);
+		if(!rules.length)rules=[''];
+		document.getElementById('productMatchRules').innerHTML=rules.map(ruleRowHtml).join('');
+		updateRuleRemoveState();
+		validateRules();
+	}
+	function updateRuleRemoveState(){
+		var rows=document.querySelectorAll('#productMatchRules .rule-row');
+		Array.prototype.forEach.call(document.querySelectorAll('#productMatchRules .remove-rule'),function(btn){btn.disabled=rows.length<=1});
+	}
+	function setActiveRuleInput(input){
+		if(input&&input.classList&&input.classList.contains('rule-input'))activeRuleInput=input;
+	}
+	function selectedRuleInput(){
+		var focused=document.querySelector('#productMatchRules .rule-input:focus');
+		if(focused){setActiveRuleInput(focused);return focused}
+		if(activeRuleInput&&document.getElementById('productMatchRules').contains(activeRuleInput))return activeRuleInput;
+		return document.querySelector('#productMatchRules .rule-input');
+	}
+	function insertAtCursor(input,text){
+		if(!input)return;
+		var start=input.selectionStart||0;
+		var end=input.selectionEnd||0;
+		input.value=input.value.slice(0,start)+text+input.value.slice(end);
+		input.focus();
+		input.selectionStart=input.selectionEnd=start+text.length;
+		validateRules();
+	}
+	function validateRules(){
+		var hasError=false;
+		var hasValue=false;
+		Array.prototype.forEach.call(document.querySelectorAll('#productMatchRules .rule-row'),function(row){
+			var input=row.querySelector('.rule-input');
+			var status=row.querySelector('.rule-status');
+			var value=input.value.trim();
+			status.className='rule-status';
+			if(!value){
+				status.textContent='空规则不会保存';
+				status.classList.add('warn');
+				return;
+			}
+			hasValue=true;
+			if(hasEmptyAlternative(value)){
+				hasError=true;
+				status.textContent='错误：| 前后都必须有匹配内容';
+				status.classList.add('error');
+				return;
+			}
+			var compiled=compileRule(value);
+			if(compiled.error){
+				hasError=true;
+				status.textContent='错误：'+compiled.error;
+				status.classList.add('error');
+				return;
+			}
+			var warning=regexWarning(value);
+			status.textContent=warning||'表达式有效';
+			status.classList.add(warning?'warn':'ok');
 		});
-
-		document.getElementById('resetButton').addEventListener('click', function () {
-			keyword.value = '';
-			shippingFilter.value = '';
-			statusFilter.value = '';
-			startDate.value = '2025-03-03';
+		document.getElementById('productMatchRule').value=joinRules();
+		return {hasError:hasError,hasValue:hasValue};
+	}
+	function escapeFocusedRule(){
+		var input=selectedRuleInput();
+		if(!input)return;
+		var start=input.selectionStart||0;
+		var end=input.selectionEnd||0;
+		if(end>start){
+			input.value=input.value.slice(0,start)+escapeRegex(input.value.slice(start,end))+input.value.slice(end);
+		}else{
+			input.value=escapeRegex(input.value);
+		}
+		validateRules();
+		input.focus();
+	}
+	function testRules(){
+		var state=validateRules();
+		var text=document.getElementById('ruleTestText').value.trim();
+		var result=document.getElementById('ruleTestResult');
+		var rules=splitRules(joinRules());
+		if(!rules.length){
+			result.innerHTML='<span class="warn">没有可测试的规则</span>';
+			return false;
+		}
+		if(state.hasError){
+			result.innerHTML='<span class="error">请先修正表达式错误</span>';
+			return false;
+		}
+		if(!text){
+			result.innerHTML='<span class="warn">请输入商品名测试匹配</span>';
+			return false;
+		}
+		var matched=rules.filter(function(rule){return ruleMatchesSku(rule,text)});
+		result.innerHTML=matched.length?'<span class="ok">匹配成功：'+esc(matched.join('，'))+'</span>':'<span class="warn">未匹配任何规则</span>';
+		return matched.length>0;
+	}
+	function uniqueIds(ids){
+		var seen={};
+		return (ids||[]).map(function(id){return String(id||'').trim()}).filter(function(id){if(!id||seen[id])return false;seen[id]=true;return true});
+	}
+	function merchantOptionHtml(selectedId){
+		return '<option value="">请选择商家</option>'+merchants.map(function(m){
+			var id=String(m.id||'');
+			return '<option value="'+esc(id)+'"'+(String(selectedId||'')===id?' selected':'')+'>'+esc(merchantLabel(m))+'</option>';
+		}).join('');
+	}
+	function merchantRowHtml(selectedId){
+		return '<div class="merchant-bind-row"><select class="product-merchant-select">'+merchantOptionHtml(selectedId)+'</select><button class="link-btn danger remove-product-merchant" type="button">'+icon('i-trash')+'移除</button></div>';
+	}
+	function renderMerchantRows(selectedIds){
+		var ids=uniqueIds(String(selectedIds||'').split(','));
+		if(!ids.length)ids=[''];
+		document.getElementById('productMerchantRows').innerHTML=ids.map(merchantRowHtml).join('');
+		updateMerchantRemoveState();
+	}
+	function addMerchantRow(selectedId){
+		document.getElementById('productMerchantRows').insertAdjacentHTML('beforeend',merchantRowHtml(selectedId||''));
+		updateMerchantRemoveState();
+	}
+	function updateMerchantRemoveState(){
+		var rows=document.querySelectorAll('#productMerchantRows .merchant-bind-row');
+		Array.prototype.forEach.call(document.querySelectorAll('.remove-product-merchant'),function(btn){btn.disabled=rows.length<=1});
+	}
+	function selectedMerchantIds(){
+		return uniqueIds(Array.prototype.map.call(document.querySelectorAll('#productMerchantRows .product-merchant-select'),function(select){return select.value})).join(',');
+	}
+	function pstart(p){return first(p,['startTime','start_time'])}
+	function pend(p){return first(p,['endTime','end_time'])}
+	function free(p){var v=String(p.expressPayer||'').toLowerCase();return v==='1'||v==='yes'||v==='seller'||v.indexOf('包邮')>-1||v.indexOf('商家')>-1||v.indexOf('卖家')>-1}
+	function expired(p){var e=pend(p);return e?new Date(String(e).replace(' ','T')).getTime()<Date.now():false}
+	function dateOnly(v){return String(v||'').slice(0,10)}
+	function dt(v){return v?String(v).replace('T',' ').slice(0,16):'-'}
+	function pad2(v){v=parseInt(v,10);return (v<10?'0':'')+v}
+	function parseDateTimeParts(v,fallbackDate,fallbackTime){
+		var text=String(v||'').trim().replace('T',' ');
+		var match=text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+		var date=fallbackDate||new Date();
+		var time=fallbackTime||['00','00','00'];
+		return {
+			year:match?parseInt(match[1],10):date.getFullYear(),
+			month:match?parseInt(match[2],10):date.getMonth()+1,
+			day:match?parseInt(match[3],10):date.getDate(),
+			hour:pad2(match&&match[4]!=null?match[4]:time[0]),
+			minute:pad2(match&&match[5]!=null?match[5]:time[1]),
+			second:pad2(match&&match[6]!=null?match[6]:time[2])
+		};
+	}
+	function yearStartTime(){
+		return new Date().getFullYear()+'-01-01 00:00:00';
+	}
+	function yearEndTime(){
+		return new Date().getFullYear()+'-12-31 23:59:59';
+	}
+	function setDateNode(selector,parts){
+		var el=document.querySelector(selector);
+		if(!el)return;
+		el.setAttribute('year',parts.year);
+		el.setAttribute('month',parts.month);
+		el.setAttribute('day',parts.day);
+		el.textContent=parts.year+'-'+pad2(parts.month)+'-'+pad2(parts.day);
+	}
+	function setTimeNode(selector,parts){
+		var el=document.querySelector(selector);
+		if(!el)return;
+		el.setAttribute('hour',parts.hour);
+		el.setAttribute('minute',parts.minute);
+		el.setAttribute('second',parts.second);
+		el.textContent=parts.hour+':'+parts.minute+':'+parts.second;
+	}
+	function setDateRange(targetSelector,startValue,endValue,activate){
+		if(typeof ensureDateTimeSelector==='function'){ensureDateTimeSelector()}
+		var startDate=new Date();
+		var endDate=new Date();
+		var effectiveStart=startValue||yearStartTime();
+		var effectiveEnd=endValue||yearEndTime();
+		startDate.setMonth(0,1);
+		endDate.setMonth(11,31);
+		var start=parseDateTimeParts(effectiveStart,startDate,['00','00','00']);
+		var end=parseDateTimeParts(effectiveEnd,endDate,['23','59','59']);
+		if(window.jQuery){$('.dateTimeSelector-wraper').attr('target',targetSelector)}
+		if(typeof initialization_ds==='function'){
+			initialization_ds(new Date(start.year,start.month-1,start.day),new Date(end.year,end.month-1,end.day),targetSelector);
+		}
+		setDateNode(targetSelector+' .start-datetime .date',start);
+		setTimeNode(targetSelector+' .start-datetime .time',start);
+		setDateNode(targetSelector+' .end-datetime .date',end);
+		setTimeNode(targetSelector+' .end-datetime .time',end);
+		if(activate){document.querySelector(targetSelector).setAttribute('data-active','1')}
+		if(window.jQuery){
+			$('.dateTimeSelector-wraper .left .time .clock').val(start.hour);
+			$('.dateTimeSelector-wraper .left .time .minute').val(start.minute);
+			$('.dateTimeSelector-wraper .left .time .second').val(start.second);
+			$('.dateTimeSelector-wraper .right .time .clock').val(end.hour);
+			$('.dateTimeSelector-wraper .right .time .minute').val(end.minute);
+			$('.dateTimeSelector-wraper .right .time .second').val(end.second);
+		}
+	}
+	function datePart(selector){
+		var el=document.querySelector(selector);
+		return el.getAttribute('year')+'-'+pad2(el.getAttribute('month'))+'-'+pad2(el.getAttribute('day'));
+	}
+	function timePart(selector){
+		var el=document.querySelector(selector);
+		return pad2(el.getAttribute('hour')||'00')+':'+pad2(el.getAttribute('minute')||'00')+':'+pad2(el.getAttribute('second')||'00');
+	}
+	function productStartTime(){return datePart('#adddate .start-datetime .date')+' '+timePart('#adddate .start-datetime .time')}
+	function productEndTime(){return datePart('#adddate .end-datetime .date')+' '+timePart('#adddate .end-datetime .time')}
+	function filterStartTime(){return datePart('#filterDateRange .start-datetime .date')+' '+timePart('#filterDateRange .start-datetime .time')}
+	function filterEndTime(){return datePart('#filterDateRange .end-datetime .date')+' '+timePart('#filterDateRange .end-datetime .time')}
+	function filterDateRangeActive(){return document.getElementById('filterDateRange').getAttribute('data-active')==='1'}
+	function parseTime(value){var time=new Date(String(value||'').replace(' ','T')).getTime();return isNaN(time)?null:time}
+	function money(v){if(v==null||v==='')return '-';var n=Number(v);return isNaN(n)?String(v):n.toFixed(2)}
+	function selectedIds(){return Array.prototype.map.call(document.querySelectorAll('.row-check:checked'),function(c){return c.value})}
+	function matches(p){
+		var kw=document.getElementById('keyword').value.trim().toLowerCase();
+		var ship=document.getElementById('shippingFilter').value;
+		var status=document.getElementById('statusFilter').value;
+		var rangeActive=filterDateRangeActive();
+		var filterStart=rangeActive?parseTime(filterStartTime()):null;
+		var filterEnd=rangeActive?parseTime(filterEndTime()):null;
+		var productStart=rangeActive?parseTime(pstart(p)):null;
+		var productEnd=rangeActive?parseTime(pend(p)):null;
+		var text=[pname(p),p.merchantNames,p.matchRule,p.weight,p.price,p.mPrice,p.remotePrice,p.packPrice,p.expressPayer].join(' ').toLowerCase();
+		if(kw&&text.indexOf(kw)===-1)return false;
+		if(ship==='yes'&&!free(p))return false;
+		if(ship==='no'&&free(p))return false;
+		if(status==='active'&&expired(p))return false;
+		if(status==='expired'&&!expired(p))return false;
+		if(rangeActive&&filterStart&&productEnd&&productEnd<filterStart)return false;
+		if(rangeActive&&filterEnd&&productStart&&productStart>filterEnd)return false;
+		return true;
+	}
+	function render(){
+		var list=document.getElementById('productsList');
+		var start=(currentPage-1)*pageSize;
+		var pageProducts=filteredProducts.slice(start,start+pageSize);
+		if(!pageProducts.length){
+			list.innerHTML='<tr class="empty-row"><td colspan="9">暂无产品数据</td></tr>';
+		}else{
+			list.innerHTML=pageProducts.map(function(p){
+				var name=pname(p)||'-';
+				var isFree=free(p);
+				var isExpired=expired(p);
+				return ['<tr data-product-id="'+esc(p.id||'')+'">',
+					'<td class="check-cell"><input class="row-check" type="checkbox" value="'+esc(p.id||'')+'" aria-label="选择产品 '+esc(name)+'"></td>',
+					'<td><div class="product-name">'+esc(name)+'</div></td>',
+					'<td><span class="meta-value">'+esc(p.merchantNames||'全部商家')+'</span></td>',
+					'<td><span class="meta-value">'+esc(p.weight||'-')+'</span></td>',
+					'<td>'+renderRuleCode(p.matchRule)+'</td>',
+					'<td><div class="meta-stack">',
+					'<div class="meta-line"><span class="meta-label">单价价格：</span><span class="meta-value price">'+esc(money(p.price))+'</span></div>',
+					'<div class="meta-line"><span class="meta-label">多件价格：</span><span class="meta-value price">'+esc(p.mPrice||p.m_price||'-')+'</span></div>',
+					'<div class="meta-line"><span class="meta-label">偏远运费：</span><span class="meta-value">'+esc(money(p.remotePrice||p.far_price))+'</span></div>',
+					'<div class="meta-line"><span class="meta-label">包装费：</span><span class="meta-value">'+esc(money(p.packPrice))+'</span></div>',
+					'</div></td>',
+					'<td><span class="tag '+(isFree?'':'muted')+'">'+esc(p.expressPayer||(isFree?'包邮':'不包邮'))+'</span></td>',
+					'<td><div class="meta-stack"><div class="meta-line"><span class="meta-label">开始：</span><span class="meta-value">'+esc(dt(pstart(p)))+'</span></div><div class="meta-line"><span class="meta-label">结束：</span><span class="meta-value">'+esc(dt(pend(p)))+'</span></div><div><span class="tag '+(isExpired?'warn':'')+'">'+(isExpired?'已过期':'有效')+'</span></div></div></td>',
+					'<td><div class="action-group"><button class="link-btn edit-product" type="button" data-id="'+esc(p.id||'')+'">'+icon('i-edit')+'编辑</button><button class="link-btn danger delete-product" type="button" data-id="'+esc(p.id||'')+'">'+icon('i-trash')+'删除</button></div></td>',
+					'</tr>'].join('');
+			}).join('');
+		}
+		document.getElementById('productCount').textContent=filteredProducts.length;
+		document.getElementById('paginationTotal').textContent='共 '+filteredProducts.length+' 条';
+		document.getElementById('currentPage').textContent=currentPage;
+		document.getElementById('checkAll').checked=false;
+	}
+	function applyFilters(){
+		filteredProducts=products.filter(matches);
+		var max=Math.max(1,Math.ceil(filteredProducts.length/pageSize));
+		if(currentPage>max)currentPage=max;
+		render();
+	}
+	function loadProducts(){
+		if(!getToken())showToast('请先在登录页输入密钥');
+		document.getElementById('productsList').innerHTML='<tr class="loading-row"><td colspan="9">正在获取产品数据...</td></tr>';
+		return requestJson('/getProducts/index.php',{}).then(function(data){
+			if(!data||!data.success||!Array.isArray(data.data))throw new Error(data&&data.txt?data.txt:'获取产品失败');
+			products=data.data;
+			applyFilters();
+		}).catch(function(e){
+			products=[];
+			filteredProducts=[];
+			render();
+			showToast(e.message||'获取产品失败');
 		});
-
-		document.querySelectorAll('.link-btn, .bottom-tools .btn, .pagination .btn').forEach(function (button) {
-			button.addEventListener('click', function () {
-				showToast(button.textContent.trim() + '：演示操作');
-			});
+	}
+	function loadMerchants(){
+		return requestJson('/getMerchants/index.php',{}).then(function(data){
+			merchants=data&&data.success&&Array.isArray(data.data)?data.data:[];
+		}).catch(function(){
+			merchants=[];
+			showToast('获取商家失败');
 		});
-	})();
+	}
+	function findProduct(id){return products.filter(function(p){return String(p.id)===String(id)})[0]||null}
+	function openModal(p){
+		document.getElementById('dialogTitle').textContent=p?'编辑产品':'添加产品';
+		document.getElementById('productId').value=p?p.id||'':'';
+		renderMerchantRows(p?p.merchantIds||'':'');
+		document.getElementById('productName').value=p?pname(p):'';
+		document.getElementById('productPrice').value=p?p.price||'':'';
+		document.getElementById('productMPrice').value=p?p.mPrice||p.m_price||'':'';
+		document.getElementById('productRemotePrice').value=p?p.remotePrice||p.far_price||'':'';
+		document.getElementById('productPackPrice').value=p?p.packPrice||'':'';
+		document.getElementById('productExpressPayer').value=p?p.expressPayer||'':'';
+		document.getElementById('productWeight').value=p?p.weight||'':'';
+		setRuleRows(p?p.matchRule||'':'');
+		document.getElementById('ruleTestText').value='';
+		document.getElementById('ruleTestResult').textContent='未测试';
+		if(p){
+			setDateRange('#adddate',pstart(p),pend(p),true);
+		}else{
+			setDateRange('#adddate',yearStartTime(),yearEndTime(),true);
+		}
+		modal.classList.add('show');
+		document.getElementById('productName').focus();
+	}
+	function closeModal(){modal.classList.remove('show')}
+	function formData(){
+		var name=document.getElementById('productName').value.trim();
+		if(!name){showToast('请输入产品名称');document.getElementById('productName').focus();return null}
+		return {
+			id:document.getElementById('productId').value,
+			productName:name,
+			merchantIds:selectedMerchantIds(),
+			matchRule:joinRules(),
+			price:document.getElementById('productPrice').value.trim(),
+			mPrice:document.getElementById('productMPrice').value.trim(),
+			remotePrice:document.getElementById('productRemotePrice').value.trim(),
+			packPrice:document.getElementById('productPackPrice').value.trim(),
+			expressPayer:document.getElementById('productExpressPayer').value,
+			weight:document.getElementById('productWeight').value.trim(),
+			startTime:productStartTime(),
+			endTime:productEndTime()
+		};
+	}
+	function saveProduct(e){
+		e.preventDefault();
+		var ruleState=validateRules();
+		if(ruleState.hasError){showToast('请先修正表达式错误');return}
+		var payload=formData();
+		if(!payload)return;
+		var endpoint=payload.id?'/updateProduct/index.php':'/addProduct/index.php';
+		if(!payload.id)delete payload.id;
+		document.getElementById('saveProductButton').disabled=true;
+		requestJson(endpoint,payload).then(function(data){
+			if(!data||!data.success)throw new Error(data&&data.txt?data.txt:'保存产品失败');
+			showToast('产品已保存');
+			return loadProducts();
+		}).catch(function(err){
+			showToast(err.message||'保存产品失败');
+		}).finally(function(){
+			document.getElementById('saveProductButton').disabled=false;
+		});
+	}
+	function deleteProduct(id){
+		var p=findProduct(id);
+		var name=p?pname(p):id;
+		if(!id){showToast('缺少产品 ID');return Promise.resolve()}
+		if(!confirm('确定删除产品「'+name+'」？'))return Promise.resolve();
+		return requestJson('/delProduct/index.php',{id:id}).then(function(data){
+			if(!data||!data.success)throw new Error(data&&data.txt?data.txt:'删除产品失败');
+			showToast('产品已删除');
+			return loadProducts();
+		}).catch(function(e){
+			showToast(e.message||'删除产品失败');
+		});
+	}
+	function batchDelete(){
+		var ids=selectedIds();
+		if(!ids.length){showToast('请选择要删除的产品');return}
+		if(!confirm('确定删除选中的 '+ids.length+' 个产品？'))return;
+		Promise.all(ids.map(function(id){return requestJson('/delProduct/index.php',{id:id})})).then(function(results){
+			var failed=results.filter(function(item){return !item||!item.success});
+			if(failed.length)throw new Error('部分产品删除失败');
+			showToast('已删除 '+ids.length+' 个产品');
+			return loadProducts();
+		}).catch(function(e){
+			showToast(e.message||'批量删除失败');
+		});
+	}
+
+	document.getElementById('searchButton').addEventListener('click',function(){currentPage=1;loadProducts()});
+	document.getElementById('resetButton').addEventListener('click',function(){document.getElementById('keyword').value='';document.getElementById('shippingFilter').value='';document.getElementById('statusFilter').value='';document.getElementById('filterDateRange').setAttribute('data-active','0');setDateRange('#filterDateRange','','',false);currentPage=1;applyFilters()});
+	document.getElementById('keyword').addEventListener('keydown',function(e){if(e.key==='Enter'){currentPage=1;loadProducts()}});
+	['shippingFilter','statusFilter'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){currentPage=1;applyFilters()})});
+	document.getElementById('filterDateRange').addEventListener('click',function(){this.setAttribute('data-active','1');setDateRange('#filterDateRange',filterStartTime(),filterEndTime(),true)});
+	$(document).on('click','.dateTimeSelector-wraper .confirm-datetime',function(){if($('.dateTimeSelector-wraper').attr('target')==='#filterDateRange'){setTimeout(function(){currentPage=1;applyFilters()},0)}});
+	document.getElementById('pageSizeSelect').addEventListener('change',function(){pageSize=parseInt(this.value,10)||50;currentPage=1;render()});
+	document.getElementById('prevPage').addEventListener('click',function(){if(currentPage>1){currentPage--;render()}});
+	document.getElementById('nextPage').addEventListener('click',function(){if(currentPage*pageSize<filteredProducts.length){currentPage++;render()}});
+	document.getElementById('checkAll').addEventListener('change',function(){var checked=this.checked;Array.prototype.forEach.call(document.querySelectorAll('.row-check'),function(c){c.checked=checked;c.closest('tr').classList.toggle('is-selected',checked)})});
+	document.getElementById('productsList').addEventListener('change',function(e){if(e.target.classList.contains('row-check'))e.target.closest('tr').classList.toggle('is-selected',e.target.checked)});
+	document.getElementById('productsList').addEventListener('click',function(e){var edit=e.target.closest('.edit-product'),del=e.target.closest('.delete-product');if(edit)openModal(findProduct(edit.getAttribute('data-id')));if(del)deleteProduct(del.getAttribute('data-id'))});
+	document.getElementById('addProductButton').addEventListener('click',function(){openModal(null)});
+	document.getElementById('addProductMerchant').addEventListener('click',function(){addMerchantRow('')});
+	document.getElementById('productMerchantRows').addEventListener('click',function(e){var btn=e.target.closest('.remove-product-merchant');if(!btn)return;btn.closest('.merchant-bind-row').remove();if(!document.querySelector('#productMerchantRows .merchant-bind-row'))addMerchantRow('');updateMerchantRemoveState()});
+	document.getElementById('addRuleButton').addEventListener('click',function(){addRuleRow('');selectedRuleInput().focus()});
+	document.getElementById('escapeRuleButton').addEventListener('click',escapeFocusedRule);
+	document.getElementById('ruleSymbols').addEventListener('click',function(e){var btn=e.target.closest('.rule-symbol');if(!btn)return;insertAtCursor(selectedRuleInput(),btn.getAttribute('data-symbol')||'')});
+	document.getElementById('productMatchRules').addEventListener('focusin',function(e){setActiveRuleInput(e.target)});
+	document.getElementById('productMatchRules').addEventListener('pointerdown',function(e){setActiveRuleInput(e.target)});
+	document.getElementById('productMatchRules').addEventListener('keyup',function(e){setActiveRuleInput(e.target)});
+	document.getElementById('productMatchRules').addEventListener('input',function(e){if(e.target.classList.contains('rule-input')){setActiveRuleInput(e.target);validateRules()}});
+	document.getElementById('productMatchRules').addEventListener('click',function(e){
+		var remove=e.target.closest('.remove-rule');
+		var escape=e.target.closest('.escape-one-rule');
+		if(remove){
+			remove.closest('.rule-row').remove();
+			if(!document.querySelector('#productMatchRules .rule-row'))addRuleRow('');
+			updateRuleRemoveState();
+			validateRules();
+		}
+		if(escape){
+			var input=escape.closest('.rule-row').querySelector('.rule-input');
+			input.value=escapeRegex(input.value);
+			validateRules();
+			input.focus();
+		}
+	});
+	document.getElementById('testRuleButton').addEventListener('click',testRules);
+	document.getElementById('ruleTestText').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();testRules()}});
+	document.getElementById('batchDeleteButton').addEventListener('click',batchDelete);
+	document.getElementById('importButton').addEventListener('click',function(){showToast('导入表格功能待接入')});
+	document.getElementById('exportButton').addEventListener('click',function(){showToast('导出表格功能待接入')});
+	document.getElementById('closeModalButton').addEventListener('click',closeModal);
+	document.getElementById('productForm').addEventListener('submit',saveProduct);
+	renderRuleSymbols();
+	setDateRange('#filterDateRange','','',false);
+	loadMerchants().then(loadProducts);
+})();
 </script>
 </body>
 </html>

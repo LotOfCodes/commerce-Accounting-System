@@ -1,7 +1,6 @@
 <?php
-require_once 'ini.php';
-$ini = new ini();
-$authorization = $ini->authorization;
+require_once __DIR__ . '/base/adminAuth.php';
+$authorization = current_api_token();
 // 验证请求方法
 if ($_SERVER['REQUEST_METHOD'] !== 'POST'&&$_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
     echo_error("REQUEST_METHOD only post");
@@ -22,7 +21,7 @@ $authorization_ = $_SERVER['HTTP_TOKEN'] ?? '';//$_SERVER['AUTHORIZATION'] ?? ''
 @$authorizationKey = $_SERVER['HTTP_TOKEN']; 
 
 //echo 'authorization:'.$authorizationKey;
-if ($authorizationKey !== $authorization) {
+if ($authorization === '' || $authorizationKey !== $authorization) {
     echo_error("Authorization failed: Invalid token");
     exit;
 }

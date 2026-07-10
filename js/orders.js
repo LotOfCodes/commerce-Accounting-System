@@ -49,12 +49,11 @@ function getOrders(startTime,endTime,page,pageSize)
 	pageSize = pageSize > 0 ? pageSize : 50;
 	var postdata = {"page":page,"pageSize":pageSize,"startTime":startTime,"endTime":endTime};
 	var Gr = JSON.parse(localStorage.getItem("orders-token") || "{}"); 
-	//{"token":"2157362b9fb67e74"}
 	var headers= {  
 		'Content-Type': 'application/json;charset=UTF-8',  
-		'token': Gr.token ? Gr.token : "" //2157362b9fb67e74
+		'token': Gr.token ? Gr.token : ""
 	}; 
-	var url = 'https://orders.8866.info/api/getOrders/index.php';	
+	var url = 'api/getOrders/index.php';	
 	fetch(url, {
 		method: 'POST',
 		headers: headers,
@@ -91,7 +90,7 @@ function getBeans(orderId)
 		'Content-Type': 'application/json;charset=UTF-8',  
 		'token': Gr.token ? Gr.token : ""
 	}; 
-	var url ='https://orders.8866.info/api/getBeans/index.php';	
+	var url ='api/getBeans/index.php';	
 	fetch(url, {
 		method: 'POST',
 		headers: headers,

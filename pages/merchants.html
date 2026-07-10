@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>商家管理</title>
+<style>
+:root{--bg:#f3f6fb;--panel:#fff;--line:#dfe5ef;--line-soft:#edf1f7;--text:#1f2937;--muted:#6b7280;--blue:#3e7cff;--blue-dark:#2f6dec;--green:#13a66b;--red:#d93025;--amber:#b7791f}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;font-family:Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}button,input{font-family:inherit}.merchants-page{min-height:100%;padding:14px 14px 76px}.toolbar,.table-panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,41,55,.06)}.toolbar{padding:14px}.summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.page-title{margin:0;font-size:20px;line-height:28px}.merchant-count{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 10px;border-radius:6px;background:#eef4ff;color:var(--blue);font-size:13px;font-weight:700}.filter-grid{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:10px;align-items:end}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:12px;color:var(--muted)}.field input{width:100%;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;outline:0;background:#fff;color:var(--text);font-size:13px}.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(62,124,255,.12)}.filter-actions,.action-group,.bottom-tools,.pagination,.dialog-head,.dialog-actions,.shop-row-actions{display:flex;align-items:center;gap:8px}.btn,.link-btn,.icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--text);cursor:pointer;white-space:nowrap}.btn{height:34px;padding:0 14px;border-radius:6px;font-size:13px}.link-btn{height:28px;padding:0 10px;border-color:#cfe0ff;border-radius:5px;background:#f3f7ff;color:var(--blue);font-size:12px}.icon-btn{width:34px;height:34px;border-radius:6px}.btn:hover,.link-btn:hover,.icon-btn:hover{border-color:var(--blue);color:var(--blue)}.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn.primary:hover{background:var(--blue-dark);color:#fff}.btn.danger,.link-btn.danger,.icon-btn.danger{border-color:#ffd9d6;background:#fff5f4;color:var(--red)}.btn:disabled{cursor:not-allowed;opacity:.62}.icon{width:15px;height:15px;flex:0 0 auto;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}.table-panel{margin-top:14px;overflow:hidden}.table-scroll{width:100%;overflow:auto}.merchants-table{width:100%;min-width:940px;border-collapse:collapse}.merchants-table th,.merchants-table td{border-bottom:1px solid var(--line-soft);padding:12px;text-align:left;vertical-align:top;font-size:13px}.merchants-table th{position:sticky;top:0;z-index:1;background:#f8fafc;color:#4b5563;font-weight:700}.merchants-table tbody tr:hover{background:#fbfdff}.merchants-table tbody tr.is-selected{background:#f2f7ff}.check-cell{width:44px;text-align:center}.merchant-name{font-weight:700;font-size:14px}.meta-stack{display:grid;gap:7px}.meta-line{display:flex;align-items:flex-start;gap:6px;line-height:20px}.meta-label{flex:0 0 auto;color:var(--muted)}.meta-value{min-width:0;word-break:break-all}.shop-list{display:flex;flex-wrap:wrap;gap:7px}.shop-tag{display:inline-flex;align-items:center;gap:6px;min-height:26px;max-width:100%;padding:0 9px;border:1px solid #dbe7ff;border-radius:999px;background:#f7faff;color:#1d4ed8;font-size:12px;font-weight:700}.shop-code{color:var(--muted);font-weight:400}.empty-row td,.loading-row td{padding:28px 12px;text-align:center;color:var(--muted)}.pagination{justify-content:flex-end;padding:12px;color:var(--muted);font-size:13px}.page-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:var(--blue);color:#fff;font-weight:700}.bottom-tools{position:fixed;left:0;right:0;bottom:0;justify-content:center;padding:12px 14px;background:rgba(31,41,55,.86);backdrop-filter:blur(8px)}.bottom-tools .btn{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff}.bottom-tools .btn:hover{border-color:#fff;color:#fff}.modal-backdrop{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.48)}.modal-backdrop.show{display:flex}.merchant-dialog{width:min(820px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:8px;background:#fff;box-shadow:0 18px 50px rgba(15,23,42,.26)}.dialog-head,.dialog-actions{justify-content:space-between;padding:14px;border-bottom:1px solid var(--line-soft)}.dialog-actions{justify-content:flex-end;border-top:1px solid var(--line-soft);border-bottom:0}.dialog-title{margin:0;font-size:18px;line-height:26px}.merchant-form{padding:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:12px}.form-grid .wide{grid-column:span 2}.section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 0;font-size:13px;font-weight:700;color:#4b5563}.shop-editor{display:grid;gap:8px}.shop-row{display:grid;grid-template-columns:minmax(140px,180px) minmax(180px,1fr) auto;gap:8px;align-items:end;padding:10px;border:1px solid var(--line-soft);border-radius:8px;background:#fbfdff}.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);z-index:30;display:none;padding:9px 14px;border-radius:6px;background:rgba(17,24,39,.92);color:#fff;font-size:13px}.toast.show{display:block}@media(max-width:780px){.merchants-page{padding:10px 10px 88px}.summary-row{align-items:flex-start;flex-direction:column}.filter-grid,.form-grid,.shop-row{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.filter-actions,.bottom-tools,.pagination{flex-wrap:wrap}.filter-actions .btn,.bottom-tools .btn{flex:1 1 120px}.shop-row-actions{justify-content:flex-end}}
+</style>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true">
+	<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></symbol>
+	<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></symbol>
+	<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol>
+	<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></symbol>
+	<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></symbol>
+	<symbol id="i-store" viewBox="0 0 24 24"><path d="M4 10h16"></path><path d="M5 10l1-6h12l1 6"></path><path d="M6 10v10h12V10"></path><path d="M9 20v-6h6v6"></path></symbol>
+	<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol>
+	<symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></symbol>
+</svg>
+
+<div class="merchants-page">
+	<section class="toolbar">
+		<div class="summary-row">
+			<h1 class="page-title">商家管理</h1>
+			<div class="merchant-count">商家总数：<span id="merchantCount">0</span></div>
+		</div>
+		<div class="filter-grid">
+			<div class="field">
+				<label for="keyword">搜索商家 / 店铺</label>
+				<input id="keyword" type="text" placeholder="输入商家名称、商家编号、店铺名称或店铺编号">
+			</div>
+			<div class="filter-actions">
+				<button class="btn primary" type="button" id="searchButton"><svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>搜索</button>
+				<button class="btn" type="button" id="resetButton"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>重置</button>
+			</div>
+		</div>
+	</section>
+
+	<section class="table-panel">
+		<div class="table-scroll">
+			<table class="merchants-table">
+				<thead>
+					<tr>
+						<th class="check-cell"><input type="checkbox" id="checkAll" aria-label="全选"></th>
+						<th>商家名称</th>
+						<th>商家编号</th>
+						<th>绑定店铺列表</th>
+						<th>绑定数量</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody id="merchantsList">
+					<tr class="loading-row"><td colspan="6">正在获取商家数据...</td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="pagination">
+			<span id="paginationTotal">共 0 条</span>
+			<select class="btn" id="pageSizeSelect" aria-label="每页条数">
+				<option value="20">20 条/页</option>
+				<option value="50" selected>50 条/页</option>
+				<option value="100">100 条/页</option>
+			</select>
+			<button class="btn" type="button" id="prevPage">上一页</button>
+			<span class="page-num" id="currentPage">1</span>
+			<button class="btn" type="button" id="nextPage">下一页</button>
+		</div>
+	</section>
+</div>
+
+<div class="bottom-tools">
+	<button class="btn" type="button" id="addMerchantButton"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>添加商家</button>
+	<button class="btn" type="button" id="batchDeleteButton"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>批量删除</button>
+</div>
+
+<div class="modal-backdrop" id="merchantModal">
+	<div class="merchant-dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+		<div class="dialog-head">
+			<h2 class="dialog-title" id="dialogTitle">添加商家</h2>
+			<button class="btn" type="button" id="closeModalButton"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg>关闭</button>
+		</div>
+		<form class="merchant-form" id="merchantForm">
+			<input type="hidden" id="merchantId">
+			<div class="form-grid">
+				<div class="field">
+					<label for="merchantName">商家名称</label>
+					<input id="merchantName" type="text" autocomplete="off">
+				</div>
+				<div class="field">
+					<label for="merchantCode">商家编号</label>
+					<input id="merchantCode" type="text" autocomplete="off" placeholder="留空自动生成">
+				</div>
+				<div class="field wide">
+					<div class="section-title">
+						<span>绑定店铺列表</span>
+						<button class="btn" type="button" id="addShopButton"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>添加绑定店铺</button>
+					</div>
+				</div>
+				<div class="field wide">
+					<div class="shop-editor" id="shopEditor"></div>
+				</div>
+			</div>
+			<div class="dialog-actions">
+				<button class="btn primary" type="submit" id="saveMerchantButton"><svg class="icon" aria-hidden="true"><use href="#i-save"></use></svg>保存</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="toast" id="toast">商家数据已更新</div>
+
+<script src="../js/jquery.min.js"></script>
+<script>
+(function(){
+	'use strict';
+	var API_BASE='../api';
+	var merchants=[];
+	var filteredMerchants=[];
+	var currentPage=1;
+	var pageSize=50;
+	var toast=document.getElementById('toast');
+	var modal=document.getElementById('merchantModal');
+
+	function icon(id){return '<svg class="icon" aria-hidden="true"><use href="#'+id+'"></use></svg>'}
+	function showToast(text){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(function(){toast.classList.remove('show')},1600)}
+	function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+	function getToken(){try{return (JSON.parse(localStorage.getItem('orders-token')||'{}').token||'').trim()}catch(e){return ''}}
+	function requestJson(endpoint,payload){return fetch(API_BASE+endpoint,{method:'POST',headers:{'Content-Type':'application/json;charset=UTF-8','token':getToken()},body:JSON.stringify(payload||{}),redirect:'follow'}).then(function(res){return res.json()})}
+	function selectedIds(){return Array.prototype.map.call(document.querySelectorAll('.row-check:checked'),function(c){return c.value})}
+	function findMerchant(id){return merchants.filter(function(m){return String(m.id)===String(id)})[0]||null}
+	function shopText(shop){return [shop.shopCode,shop.shopName].filter(Boolean).join(' ')}
+	function matches(merchant){
+		var kw=document.getElementById('keyword').value.trim().toLowerCase();
+		var shops=Array.isArray(merchant.shops)?merchant.shops:[];
+		var text=[merchant.merchantName,merchant.mid].concat(shops.map(shopText)).join(' ').toLowerCase();
+		return !kw||text.indexOf(kw)>-1;
+	}
+	function renderShopTags(shops){
+		if(!shops||!shops.length)return '<span class="meta-value">未绑定店铺</span>';
+		return '<div class="shop-list">'+shops.map(function(shop){
+			var name=shop.shopName||'未命名店铺';
+			var code=shop.shopCode?'<span class="shop-code">'+esc(shop.shopCode)+'</span>':'';
+			return '<span class="shop-tag"><svg class="icon" aria-hidden="true"><use href="#i-store"></use></svg><span>'+esc(name)+'</span>'+code+'</span>';
+		}).join('')+'</div>';
+	}
+	function render(){
+		var list=document.getElementById('merchantsList');
+		var start=(currentPage-1)*pageSize;
+		var pageMerchants=filteredMerchants.slice(start,start+pageSize);
+		if(!pageMerchants.length){
+			list.innerHTML='<tr class="empty-row"><td colspan="6">暂无商家数据</td></tr>';
+		}else{
+			list.innerHTML=pageMerchants.map(function(m){
+				var name=m.merchantName||'-';
+				var shops=Array.isArray(m.shops)?m.shops:[];
+				return ['<tr data-merchant-id="'+esc(m.id||'')+'">',
+					'<td class="check-cell"><input class="row-check" type="checkbox" value="'+esc(m.id||'')+'" aria-label="选择商家 '+esc(name)+'"></td>',
+					'<td><div class="merchant-name">'+esc(name)+'</div></td>',
+					'<td><span class="meta-value">'+esc(m.mid||'-')+'</span></td>',
+					'<td>'+renderShopTags(shops)+'</td>',
+					'<td><span class="meta-value">'+shops.length+'</span></td>',
+					'<td><div class="action-group"><button class="link-btn edit-merchant" type="button" data-id="'+esc(m.id||'')+'">'+icon('i-edit')+'编辑</button><button class="link-btn bind-shop" type="button" data-id="'+esc(m.id||'')+'">'+icon('i-plus')+'绑定店铺</button><button class="link-btn danger delete-merchant" type="button" data-id="'+esc(m.id||'')+'">'+icon('i-trash')+'删除</button></div></td>',
+					'</tr>'].join('');
+			}).join('');
+		}
+		document.getElementById('merchantCount').textContent=filteredMerchants.length;
+		document.getElementById('paginationTotal').textContent='共 '+filteredMerchants.length+' 条';
+		document.getElementById('currentPage').textContent=currentPage;
+		document.getElementById('checkAll').checked=false;
+	}
+	function applyFilters(){
+		filteredMerchants=merchants.filter(matches);
+		var max=Math.max(1,Math.ceil(filteredMerchants.length/pageSize));
+		if(currentPage>max)currentPage=max;
+		render();
+	}
+	function loadMerchants(){
+		if(!getToken())showToast('请先在登录页输入密钥');
+		document.getElementById('merchantsList').innerHTML='<tr class="loading-row"><td colspan="6">正在获取商家数据...</td></tr>';
+		return requestJson('/getMerchants/index.php',{keyword:document.getElementById('keyword').value.trim()}).then(function(data){
+			if(!data||!data.success||!Array.isArray(data.data))throw new Error(data&&data.txt?data.txt:'获取商家失败');
+			merchants=data.data;
+			applyFilters();
+		}).catch(function(e){
+			merchants=[];
+			filteredMerchants=[];
+			render();
+			showToast(e.message||'获取商家失败');
+		});
+	}
+	function shopRow(shop){
+		shop=shop||{};
+		var row=document.createElement('div');
+		row.className='shop-row';
+		row.innerHTML='<div class="field"><label>店铺编号</label><input class="shop-code-input" type="text" autocomplete="off" value="'+esc(shop.shopCode||'')+'"></div><div class="field"><label>店铺名称</label><input class="shop-name-input" type="text" autocomplete="off" value="'+esc(shop.shopName||'')+'"></div><div class="shop-row-actions"><button class="icon-btn danger remove-shop" type="button" title="删除绑定店铺" aria-label="删除绑定店铺"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg></button></div>';
+		return row;
+	}
+	function addShop(shop){
+		document.getElementById('shopEditor').appendChild(shopRow(shop));
+	}
+	function openModal(merchant){
+		document.getElementById('dialogTitle').textContent=merchant?'编辑商家':'添加商家';
+		document.getElementById('merchantId').value=merchant?merchant.id||'':'';
+		document.getElementById('merchantName').value=merchant?merchant.merchantName||'':'';
+		document.getElementById('merchantCode').value=merchant?merchant.mid||'':'';
+		document.getElementById('shopEditor').innerHTML='';
+		var shops=merchant&&Array.isArray(merchant.shops)?merchant.shops:[];
+		if(shops.length){shops.forEach(addShop)}else{addShop({})}
+		modal.classList.add('show');
+		document.getElementById('merchantName').focus();
+	}
+	function openBindShop(merchant){
+		openModal(merchant);
+		var rows=document.querySelectorAll('#shopEditor .shop-row');
+		if(rows.length&&rows[0].querySelector('.shop-code-input').value.trim()===''&&rows[0].querySelector('.shop-name-input').value.trim()===''){
+			rows[0].querySelector('.shop-code-input').focus();
+			return;
+		}
+		addShop({});
+		rows=document.querySelectorAll('#shopEditor .shop-row');
+		rows[rows.length-1].querySelector('.shop-code-input').focus();
+	}
+	function closeModal(){modal.classList.remove('show')}
+	function formData(){
+		var name=document.getElementById('merchantName').value.trim();
+		var shops=[];
+		if(!name){showToast('请输入商家名称');document.getElementById('merchantName').focus();return null}
+		Array.prototype.forEach.call(document.querySelectorAll('#shopEditor .shop-row'),function(row){
+			var shopCode=row.querySelector('.shop-code-input').value.trim();
+			var shopName=row.querySelector('.shop-name-input').value.trim();
+			if(shopCode||shopName)shops.push({shopCode:shopCode,shopName:shopName});
+		});
+		return {
+			id:document.getElementById('merchantId').value,
+			mid:document.getElementById('merchantCode').value.trim(),
+			merchantName:name,
+			shops:shops
+		};
+	}
+	function saveMerchant(e){
+		e.preventDefault();
+		var payload=formData();
+		if(!payload)return;
+		var endpoint=payload.id?'/updateMerchant/index.php':'/addMerchant/index.php';
+		if(!payload.id)delete payload.id;
+		document.getElementById('saveMerchantButton').disabled=true;
+		requestJson(endpoint,payload).then(function(data){
+			if(!data||!data.success)throw new Error(data&&data.txt?data.txt:'保存商家失败');
+			showToast('商家已保存');
+			closeModal();
+			return loadMerchants();
+		}).catch(function(err){
+			showToast(err.message||'保存商家失败');
+		}).finally(function(){
+			document.getElementById('saveMerchantButton').disabled=false;
+		});
+	}
+	function deleteMerchant(id){
+		var merchant=findMerchant(id);
+		var name=merchant?merchant.merchantName:id;
+		if(!id){showToast('缺少商家 ID');return Promise.resolve()}
+		if(!confirm('确定删除商家「'+name+'」及其绑定店铺吗？'))return Promise.resolve();
+		return requestJson('/delMerchant/index.php',{id:id}).then(function(data){
+			if(!data||!data.success)throw new Error(data&&data.txt?data.txt:'删除商家失败');
+			showToast('商家已删除');
+			return loadMerchants();
+		}).catch(function(e){
+			showToast(e.message||'删除商家失败');
+		});
+	}
+	function batchDelete(){
+		var ids=selectedIds();
+		if(!ids.length){showToast('请选择要删除的商家');return}
+		if(!confirm('确定删除选中的 '+ids.length+' 个商家及其绑定店铺吗？'))return;
+		Promise.all(ids.map(function(id){return requestJson('/delMerchant/index.php',{id:id})})).then(function(results){
+			var failed=results.filter(function(item){return !item||!item.success});
+			if(failed.length)throw new Error('部分商家删除失败');
+			showToast('已删除 '+ids.length+' 个商家');
+			return loadMerchants();
+		}).catch(function(e){
+			showToast(e.message||'批量删除失败');
+		});
+	}
+
+	document.getElementById('searchButton').addEventListener('click',function(){currentPage=1;loadMerchants()});
+	document.getElementById('resetButton').addEventListener('click',function(){document.getElementById('keyword').value='';currentPage=1;loadMerchants()});
+	document.getElementById('keyword').addEventListener('keydown',function(e){if(e.key==='Enter'){currentPage=1;loadMerchants()}});
+	document.getElementById('pageSizeSelect').addEventListener('change',function(){pageSize=parseInt(this.value,10)||50;currentPage=1;render()});
+	document.getElementById('prevPage').addEventListener('click',function(){if(currentPage>1){currentPage--;render()}});
+	document.getElementById('nextPage').addEventListener('click',function(){if(currentPage*pageSize<filteredMerchants.length){currentPage++;render()}});
+	document.getElementById('checkAll').addEventListener('change',function(){var checked=this.checked;Array.prototype.forEach.call(document.querySelectorAll('.row-check'),function(c){c.checked=checked;c.closest('tr').classList.toggle('is-selected',checked)})});
+	document.getElementById('merchantsList').addEventListener('change',function(e){if(e.target.classList.contains('row-check'))e.target.closest('tr').classList.toggle('is-selected',e.target.checked)});
+	document.getElementById('merchantsList').addEventListener('click',function(e){var edit=e.target.closest('.edit-merchant'),bind=e.target.closest('.bind-shop'),del=e.target.closest('.delete-merchant');if(edit)openModal(findMerchant(edit.getAttribute('data-id')));if(bind)openBindShop(findMerchant(bind.getAttribute('data-id')));if(del)deleteMerchant(del.getAttribute('data-id'))});
+	document.getElementById('addMerchantButton').addEventListener('click',function(){openModal(null)});
+	document.getElementById('batchDeleteButton').addEventListener('click',batchDelete);
+	document.getElementById('closeModalButton').addEventListener('click',closeModal);
+	document.getElementById('addShopButton').addEventListener('click',function(){addShop({});var inputs=document.querySelectorAll('#shopEditor .shop-row:last-child input');if(inputs.length)inputs[0].focus()});
+	document.getElementById('shopEditor').addEventListener('click',function(e){var btn=e.target.closest('.remove-shop');if(!btn)return;var rows=document.querySelectorAll('#shopEditor .shop-row');if(rows.length<=1){rows[0].querySelector('.shop-code-input').value='';rows[0].querySelector('.shop-name-input').value='';return}btn.closest('.shop-row').remove()});
+	document.getElementById('merchantForm').addEventListener('submit',saveMerchant);
+
+	loadMerchants();
+})();
+</script>
+</body>
+</html>

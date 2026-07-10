@@ -4,273 +4,550 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>账单列表</title>
+<link rel="stylesheet" href="../css/dateTimeSelector.css">
 <style>
-	:root {
-		--bg: #f3f6fb;
-		--panel: #fff;
-		--line: #dfe5ef;
-		--line-soft: #edf1f7;
-		--text: #1f2937;
-		--muted: #6b7280;
-		--blue: #3e7cff;
-		--blue-dark: #2f6dec;
-		--red: #d93025;
-	}
-	* {
-		box-sizing: border-box;
-	}
-	html,
-	body {
-		width: 100%;
-		min-height: 100%;
-		margin: 0;
-		font-family: Arial, "Microsoft YaHei", sans-serif;
-		background: var(--bg);
-		color: var(--text);
-	}
-	button,
-	input,
-	select {
-		font-family: inherit;
-	}
-	.bill-page {
-		min-height: 100%;
-		padding: 14px 14px 88px;
-	}
-	.toolbar,
-	.table-panel {
-		background: var(--panel);
-		border: 1px solid var(--line);
-		border-radius: 8px;
-		box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
-	}
-	.toolbar {
-		padding: 14px;
-	}
-	.summary-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-	}
-	.page-title {
-		margin: 0;
-		font-size: 20px;
-		line-height: 28px;
-	}
-	.bill-count {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		min-height: 28px;
-		padding: 0 10px;
-		border-radius: 6px;
-		background: #eef4ff;
-		color: var(--blue);
-		font-size: 13px;
-		font-weight: 700;
-	}
-	.table-panel {
-		margin-top: 14px;
-		overflow: hidden;
-	}
-	.table-scroll {
-		width: 100%;
-		overflow: auto;
-	}
-	.bill-table {
-		width: 100%;
-		min-width: 980px;
-		border-collapse: collapse;
-	}
-	.bill-table th,
-	.bill-table td {
-		border-bottom: 1px solid var(--line-soft);
-		padding: 12px;
-		text-align: left;
-		vertical-align: middle;
-		font-size: 13px;
-	}
-	.bill-table th {
-		position: sticky;
-		top: 0;
-		z-index: 1;
-		background: #f8fafc;
-		color: #4b5563;
-		font-weight: 700;
-	}
-	.check-cell {
-		width: 44px;
-		text-align: center;
-	}
-	.money {
-		color: var(--red);
-		font-size: 16px;
-		font-weight: 700;
-	}
-	.btn {
-		height: 34px;
-		padding: 0 14px;
-		border: 1px solid var(--line);
-		border-radius: 6px;
-		background: #fff;
-		color: var(--text);
-		font-size: 13px;
-		cursor: pointer;
-		white-space: nowrap;
-	}
-	.btn:hover {
-		border-color: var(--blue);
-		color: var(--blue);
-	}
-	.btn.primary {
-		border-color: var(--blue);
-		background: var(--blue);
-		color: #fff;
-	}
-	.btn.primary:hover {
-		background: var(--blue-dark);
-		color: #fff;
-	}
-	.pagination {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 8px;
-		padding: 12px;
-		color: var(--muted);
-		font-size: 13px;
-	}
-	.page-num {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 30px;
-		height: 30px;
-		border-radius: 6px;
-		background: var(--blue);
-		color: #fff;
-		font-weight: 700;
-	}
-	.bottom-tools {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		justify-content: center;
-		gap: 8px;
-		padding: 12px 14px;
-		background: rgba(31, 41, 55, 0.86);
-		backdrop-filter: blur(8px);
-	}
-	.bottom-tools .btn {
-		border-color: rgba(255, 255, 255, 0.2);
-		background: rgba(255, 255, 255, 0.1);
-		color: #fff;
-	}
-	.bottom-tools .btn:hover {
-		border-color: #fff;
-		color: #fff;
-	}
-	.toast {
-		position: fixed;
-		left: 50%;
-		bottom: 76px;
-		transform: translateX(-50%);
-		display: none;
-		padding: 9px 14px;
-		border-radius: 6px;
-		background: rgba(17, 24, 39, 0.92);
-		color: #fff;
-		font-size: 13px;
-	}
-	.toast.show {
-		display: block;
-	}
+	:root { --bg:#f3f6fb; --panel:#fff; --line:#dfe5ef; --line-soft:#edf1f7; --text:#1f2937; --muted:#6b7280; --blue:#3e7cff; --blue-dark:#2f6dec; --red:#d93025; --green:#13a66b; --amber:#b7791f; }
+	* { box-sizing:border-box; }
+	html, body { width:100%; min-height:100%; margin:0; font-family:Arial,"Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+	button, input, select { font-family:inherit; }
+	.bill-page { min-height:100%; padding:14px 14px 88px; }
+	.toolbar, .table-panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 24px rgba(31,41,55,.06); }
+	.toolbar { padding:14px; }
+	.summary-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+	.page-title { margin:0; font-size:20px; line-height:28px; }
+	.bill-count { display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:0 10px; border-radius:6px; background:#eef4ff; color:var(--blue); font-size:13px; font-weight:700; }
+	.filter-grid { display:grid; grid-template-columns:repeat(7,minmax(120px,1fr)); gap:10px; margin-top:12px; align-items:end; }
+	.date-range-field { grid-column:span 2; }
+	.field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+	.field label { font-size:12px; color:var(--muted); }
+	.field input, .field select { width:100%; height:34px; padding:0 10px; border:1px solid var(--line); border-radius:6px; outline:0; background:#fff; color:var(--text); font-size:13px; }
+	.field input:focus, .field select:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(62,124,255,.12); }
+	.datetime-select { display:inline-flex; align-items:center; min-height:34px; width:max-content; max-width:100%; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font-size:13px; cursor:pointer; overflow-x:auto; }
+	.datetime-select:hover { border-color:var(--blue); }
+	.datetime-select .start-datetime, .datetime-select .end-datetime { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+	.datetime-select .time-line { width:22px; height:1px; margin:0 9px; background:var(--line); flex:0 0 auto; }
+	.datetime-select .date { font-weight:700; }
+	.datetime-select .time { color:var(--muted); }
+	.table-panel { margin-top:14px; overflow:hidden; }
+	.table-scroll { width:100%; overflow:auto; }
+	.bill-table { width:100%; min-width:1180px; border-collapse:collapse; }
+	.bill-table th, .bill-table td { border-bottom:1px solid var(--line-soft); padding:12px; text-align:left; vertical-align:top; font-size:13px; }
+	.bill-table th { position:sticky; top:0; z-index:1; background:#f8fafc; color:#4b5563; font-weight:700; }
+	.bill-table tbody tr:hover { background:#fbfdff; }
+	.money { color:var(--red); font-size:16px; font-weight:700; white-space:nowrap; }
+	.meta-stack { display:grid; gap:7px; }
+	.meta-line { display:flex; align-items:flex-start; gap:6px; line-height:20px; }
+	.meta-label { flex:0 0 auto; color:var(--muted); }
+	.meta-value { min-width:0; word-break:break-all; }
+	.tag { display:inline-flex; align-items:center; min-height:22px; padding:0 8px; border-radius:999px; background:#e8f8f1; color:var(--green); font-size:12px; font-weight:700; }
+	.tag.warn { background:#fff5f4; color:var(--red); }
+	.tag.pending { background:#fff8e8; color:var(--amber); }
+	.tag.checked { background:#e8f8f1; color:var(--green); }
+	.btn, .link-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); cursor:pointer; white-space:nowrap; }
+	.btn { height:34px; padding:0 14px; font-size:13px; }
+	.link-btn { min-height:28px; padding:0 10px; border-color:#cfe0ff; border-radius:5px; background:#f3f7ff; color:var(--blue); font-size:12px; }
+	.btn:hover, .link-btn:hover { border-color:var(--blue); color:var(--blue); }
+	.btn.primary { border-color:var(--blue); background:var(--blue); color:#fff; }
+	.btn.primary:hover { background:var(--blue-dark); color:#fff; }
+	.link-btn.success { border-color:#cceedd; background:#effcf6; color:var(--green); }
+	.link-btn.warning { border-color:#ffe4b5; background:#fff8e8; color:var(--amber); }
+	.link-btn.danger { border-color:#ffd9d6; background:#fff5f4; color:var(--red); }
+	.action-group { display:flex; flex-wrap:wrap; gap:8px; }
+	.icon { width:15px; height:15px; flex:0 0 auto; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+	.icon-sprite { position:absolute; width:0; height:0; overflow:hidden; }
+	.empty-row td, .loading-row td { padding:28px 12px; text-align:center; color:var(--muted); }
+	.pagination { display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:12px; color:var(--muted); font-size:13px; }
+	.page-num { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:6px; background:var(--blue); color:#fff; font-weight:700; }
+	.toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); z-index:30; display:none; padding:9px 14px; border-radius:6px; background:rgba(17,24,39,.92); color:#fff; font-size:13px; }
+	.toast.show { display:block; }
+	.modal-backdrop { position:fixed; inset:0; z-index:40; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(15,23,42,.48); }
+	.modal-backdrop.show { display:flex; }
+	.confirm-modal { width:min(420px,100%); overflow:hidden; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 18px 50px rgba(15,23,42,.26); }
+	.confirm-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px; border-bottom:1px solid var(--line-soft); background:#fbfdff; }
+	.confirm-title { margin:0; font-size:17px; line-height:24px; }
+	.confirm-body { padding:16px 14px; color:#4b5563; font-size:14px; line-height:22px; }
+	.confirm-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:14px; border-top:1px solid var(--line-soft); }
+	.icon-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); cursor:pointer; }
+	.icon-btn:hover { border-color:var(--blue); color:var(--blue); }
+	.btn.danger { border-color:var(--red); background:var(--red); color:#fff; }
+	.btn.danger:hover { border-color:var(--red); background:#c5221f; color:#fff; }
+	@media (max-width:1180px) { .filter-grid{grid-template-columns:repeat(3,minmax(130px,1fr));} .date-range-field{grid-column:1 / -1;} }
+	@media (max-width:760px) { .bill-page{padding:10px 10px 76px;} .summary-row{align-items:flex-start; flex-direction:column;} .filter-grid{grid-template-columns:1fr;} .datetime-select{width:100%;} .pagination{flex-wrap:wrap;} }
 </style>
 </head>
 <body>
+	<svg class="icon-sprite" aria-hidden="true">
+		<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+		<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></symbol>
+		<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></symbol>
+		<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
+		<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></symbol>
+		<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></symbol>
+		<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></symbol>
+		<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></symbol>
+	</svg>
 	<div class="bill-page">
 		<section class="toolbar">
 			<div class="summary-row">
 				<h1 class="page-title">账单列表</h1>
-				<div class="bill-count">账单总数：<span id="billCount">2</span></div>
+				<div class="bill-count">账单总数：<span id="billCount">0</span></div>
+			</div>
+			<div class="filter-grid">
+				<div class="field"><label for="keyword">关键字</label><input id="keyword" type="text" placeholder="识别号/商家/店铺"></div>
+				<div class="field"><label for="merchantKeyword">商家</label><input id="merchantKeyword" type="text" placeholder="商家名称或编号"></div>
+				<div class="field"><label for="shopKeyword">店铺</label><input id="shopKeyword" type="text" placeholder="店铺名称或编号"></div>
+				<div class="field"><label for="checkedStatus">核对状态</label><select id="checkedStatus"><option value="">全部</option><option value="0">未核对</option><option value="1">已核对</option></select></div>
+				<div class="field date-range-field">
+					<label for="billDateRange">生成日期范围</label>
+					<div class="datetime-select" id="billDateRange">
+						<div class="start-datetime"><div class="date" year="2026" month="7" day="1">2026-07-01</div><div class="time" hour="00" minute="00" second="00">00:00:00</div></div>
+						<div class="time-line"></div>
+						<div class="end-datetime"><div class="date" year="2026" month="7" day="6">2026-07-06</div><div class="time" hour="23" minute="59" second="59">23:59:59</div></div>
+					</div>
+				</div>
+				<div class="field"><label>&nbsp;</label><div class="action-group"><button class="btn primary" type="button" id="searchBills">搜索</button><button class="btn" type="button" id="resetFilters">重置</button></div></div>
 			</div>
 		</section>
-
 		<section class="table-panel">
 			<div class="table-scroll">
 				<table class="bill-table">
 					<thead>
 						<tr>
-							<th class="check-cell"><input type="checkbox" id="checkAll" aria-label="全选"></th>
-							<th>账单生成日期</th>
-							<th>生成账单日期范围</th>
-							<th>订单数量</th>
+							<th>账单信息</th>
+							<th>商家 / 店铺</th>
+							<th>日期范围</th>
+							<th>订单统计</th>
 							<th>总金额</th>
-							<th>商家编号</th>
+							<th>操作</th>
 						</tr>
 					</thead>
 					<tbody id="billRows">
-						<tr>
-							<td class="check-cell"><input type="checkbox" class="row-check" aria-label="选择账单 2026-07-03"></td>
-							<td>2026-07-03 12:00:00</td>
-							<td>2026-07-01 00:00:00 至 2026-07-03 23:59:59</td>
-							<td>2</td>
-							<td><span class="money">￥252.00</span></td>
-							<td>DF08</td>
-						</tr>
-						<tr>
-							<td class="check-cell"><input type="checkbox" class="row-check" aria-label="选择账单 2026-07-02"></td>
-							<td>2026-07-02 18:30:00</td>
-							<td>2026-07-02 00:00:00 至 2026-07-02 23:59:59</td>
-							<td>1</td>
-							<td><span class="money">￥88.00</span></td>
-							<td>DF11</td>
-						</tr>
+						<tr class="loading-row"><td colspan="6">正在获取账单数据...</td></tr>
 					</tbody>
 				</table>
 			</div>
 			<div class="pagination">
-				<span>共 2 条</span>
-				<button class="btn" type="button">上一页</button>
-				<span class="page-num">1</span>
-				<button class="btn" type="button">下一页</button>
+				<span id="paginationTotal">共 0 条</span>
+				<select class="btn" id="pageSizeSelect" aria-label="每页条数">
+					<option value="20">20 条/页</option>
+					<option value="50" selected>50 条/页</option>
+					<option value="100">100 条/页</option>
+				</select>
+				<button class="btn" type="button" id="prevPage">上一页</button>
+				<span class="page-num" id="currentPage">1</span>
+				<button class="btn" type="button" id="nextPage">下一页</button>
+				<button class="btn" type="button" id="refreshBills"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>刷新</button>
 			</div>
 		</section>
 	</div>
-
-	<div class="bottom-tools">
-		<button class="btn primary" type="button" id="exportExcel">导出表格</button>
-		<button class="btn" type="button" id="shareLink">分享链接</button>
+	<div class="toast" id="toast">账单数据已更新</div>
+	<div class="modal-backdrop" id="confirmModal">
+		<div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+			<div class="confirm-head">
+				<h2 class="confirm-title" id="confirmTitle">确认操作</h2>
+				<button class="icon-btn" type="button" id="confirmClose" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
+			</div>
+			<div class="confirm-body" id="confirmMessage"></div>
+			<div class="confirm-actions">
+				<button class="btn" type="button" id="confirmCancel">取消</button>
+				<button class="btn primary" type="button" id="confirmOk">确定</button>
+			</div>
+		</div>
 	</div>
-	<div class="toast" id="toast">演示操作</div>
 
 <script src="../js/jquery.min.js"></script>
+<script src="../js/format-template.js"></script>
+<script src="../js/dateTimeSelector.js"></script>
+<script src="../js/xlsx.full.min.js"></script>
 <script>
 	$(function () {
+		var API_BASE = '../api';
+		var exportHeaders = ['订单编号','订单状态','收件人','收件电话','省份','详细地址','快递公司','快递单号','发货内容','商品数量','代发价','小记','发货时间','打印时间'];
+		var currentPage = 1;
+		var pageSize = 50;
+		var totalBills = 0;
+		var bills = [];
 		var $toast = $('#toast');
+		var confirmResolver = null;
 
 		function showToast(text) {
 			$toast.text(text).addClass('show');
 			window.clearTimeout(showToast.timer);
-			showToast.timer = window.setTimeout(function () {
-				$toast.removeClass('show');
-			}, 1400);
+			showToast.timer = window.setTimeout(function () { $toast.removeClass('show'); }, 1800);
+		}
+		function escapeHtml(value) {
+			return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+		}
+		function closeConfirmModal(result) {
+			$('#confirmModal').removeClass('show');
+			if (confirmResolver) {
+				confirmResolver(!!result);
+				confirmResolver = null;
+			}
+		}
+		function confirmModal(options) {
+			options = options || {};
+			if (confirmResolver) {
+				closeConfirmModal(false);
+			}
+			$('#confirmTitle').text(options.title || '确认操作');
+			$('#confirmMessage').text(options.message || '');
+			$('#confirmOk')
+				.text(options.okText || '确定')
+				.toggleClass('danger', options.danger === true)
+				.toggleClass('primary', options.danger !== true);
+			$('#confirmCancel').text(options.cancelText || '取消');
+			$('#confirmModal').addClass('show');
+			return new Promise(function (resolve) {
+				confirmResolver = resolve;
+				$('#confirmOk').trigger('focus');
+			});
+		}
+		function getToken() {
+			try { return (JSON.parse(localStorage.getItem('orders-token') || '{}').token || '').trim(); }
+			catch (error) { return ''; }
+		}
+		function requestJson(url, postdata) {
+			return fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json;charset=UTF-8', 'token': getToken() },
+				body: JSON.stringify(postdata || {}),
+				redirect: 'follow'
+			}).then(function (res) { return res.json(); });
+		}
+		function pad2(value) {
+			value = parseInt(value, 10) || 0;
+			return value < 10 ? '0' + value : String(value);
+		}
+		function formatDate(date) {
+			return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+		}
+		function parseRangeValue(value, fallbackEnd) {
+			var match = String(value || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+			var date = new Date();
+			return match ? {
+				date: new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10)),
+				hour: match[4] == null ? (fallbackEnd ? '23' : '00') : pad2(match[4]),
+				minute: match[5] == null ? (fallbackEnd ? '59' : '00') : pad2(match[5]),
+				second: match[6] == null ? (fallbackEnd ? '59' : '00') : pad2(match[6])
+			} : {
+				date: date,
+				hour: fallbackEnd ? '23' : '00',
+				minute: fallbackEnd ? '59' : '00',
+				second: fallbackEnd ? '59' : '00'
+			};
+		}
+		function setRangePart($root, side, date, timeText) {
+			var $side = $root.find(side);
+			var parts = String(timeText).split(':');
+			$side.find('.date')
+				.attr({ year:date.getFullYear(), month:date.getMonth() + 1, day:date.getDate() })
+				.text(formatDate(date));
+			$side.find('.time')
+				.attr({ hour:parts[0], minute:parts[1], second:parts[2] })
+				.text(timeText);
+		}
+		function setDefaultBillDateRange() {
+			var end = new Date();
+			var start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+			start.setDate(start.getDate() - 30);
+			setRangePart($('#billDateRange'), '.start-datetime', start, '00:00:00');
+			setRangePart($('#billDateRange'), '.end-datetime', end, '23:59:59');
+		}
+		function money(value) { return (Number(value) || 0).toFixed(2); }
+		function displayRange(bill) { return (bill.startTime || '-').slice(0, 19) + ' 至 ' + (bill.endTime || '-').slice(0, 19); }
+		function billUrl(bill) {
+			return window.location.href.split('#')[0].split('?')[0].replace(/bill-list\.html$/i, 'bill-share.html') + '?code=' + encodeURIComponent(bill.shareCode || '');
+		}
+		function isChecked(bill) { return String(bill.checkedStatus || '0') === '1'; }
+		function billInfoText(bill) {
+			return [
+				'===' + String(bill.startTime || '').slice(0, 10).replace(/-/g, '') + '~' + String(bill.endTime || '').slice(0, 10).replace(/-/g, '') + '===',
+				'订单总数:' + (bill.orderCount || 0),
+				'偏远地区:' + (bill.remoteCount || 0),
+				'合计总额：' + money(bill.totalAmount)
+			].join('\n');
+		}
+		function orderItems(order) {
+			return Array.isArray(order.items) && order.items.length ? order.items : [{
+				sku: order.sku || '',
+				quantity: order.totalQty || '',
+				agentPrice: order.agentPrice || '',
+				subtotal: order.amount || '',
+				waybillCom: order.waybillCom || '',
+				waybillNumber: order.waybillNumber || ''
+			}];
+		}
+		function goodsContentText(items) {
+			return items.map(function (item) {
+				var sku = String(item.sku || '').trim();
+				var qty = item.quantity || item.total || 0;
+				return sku ? sku + '[' + qty + '];' : '';
+			}).filter(Boolean).join('');
+		}
+		function exportRowsForBill(bill) {
+			var orders = Array.isArray(bill.orderData) ? bill.orderData : [];
+			return orders.map(function (order) {
+				var items = orderItems(order);
+				return {
+					'订单编号': order.orderId || '',
+					'订单状态': order.statusText || order.tradeStatus || '',
+					'收件人': order.receiverName || '',
+					'收件电话': order.receiverMobile || '',
+					'省份': order.receiverProvince || '',
+					'详细地址': order.receiverAddress || '',
+					'快递公司': items.map(function (item) { return item.waybillCom || ''; }).filter(Boolean).join('\n'),
+					'快递单号': items.map(function (item) { return item.waybillNumber || ''; }).filter(Boolean).join('\n'),
+					'发货内容': goodsContentText(items),
+					'商品数量': order.totalQty || items.reduce(function (sum, item) { return sum + (Number(item.quantity) || 0); }, 0),
+					'代发价': items.map(function (item) { return item.agentPrice === '' ? '' : money(item.agentPrice); }).filter(Boolean).join('\n'),
+					'小记': money(order.amount || 0),
+					'发货时间': order.deliveryTime || '',
+					'打印时间': order.printTime || ''
+				};
+			});
+		}
+		function loadBillDetail(bill) {
+			return requestJson(API_BASE + '/getBillShare/index.php', { shareCode: bill.shareCode }).then(function (data) {
+				if (!data || !data.success || !data.data) { throw new Error(data && data.txt ? data.txt : '获取账单明细失败'); }
+				return data.data;
+			});
+		}
+		function partValue($root, side) {
+			var $side = $root.find(side);
+			return $side.find('.date').text() + ' ' + $side.find('.time').text();
+		}
+		function openBillDateRangePicker(anchor) {
+			var $range = $('#billDateRange');
+			var start = parseRangeValue(partValue($range, '.start-datetime'), false);
+			var end = parseRangeValue(partValue($range, '.end-datetime'), true);
+			$('.dateTimeSelector-wraper').attr('target', '#billDateRange').show();
+			initialization_ds(start.date, end.date, '#billDateRange');
+			$('.dateTimeSelector-wraper .left .time .clock').val(start.hour);
+			$('.dateTimeSelector-wraper .left .time .minute').val(start.minute);
+			$('.dateTimeSelector-wraper .left .time .second').val(start.second);
+			$('.dateTimeSelector-wraper .right .time .clock').val(end.hour);
+			$('.dateTimeSelector-wraper .right .time .minute').val(end.minute);
+			$('.dateTimeSelector-wraper .right .time .second').val(end.second);
+			if (typeof setDateTime === 'function') { setDateTime('#billDateRange'); }
+			if (typeof positionDateTimeSelector === 'function') { positionDateTimeSelector(anchor); }
+		}
+		function filterPayload() {
+			var $range = $('#billDateRange');
+			return {
+				page: currentPage,
+				pageSize: pageSize,
+				keyword: ($('#keyword').val() || '').trim(),
+				merchantKeyword: ($('#merchantKeyword').val() || '').trim(),
+				shopKeyword: ($('#shopKeyword').val() || '').trim(),
+				checkedStatus: $('#checkedStatus').val(),
+				createdStart: partValue($range, '.start-datetime'),
+				createdEnd: partValue($range, '.end-datetime')
+			};
+		}
+		function renderRows() {
+			if (!bills.length) {
+				$('#billRows').html('<tr class="empty-row"><td colspan="6">暂无账单数据</td></tr>');
+			} else {
+				$('#billRows').html(bills.map(function (bill) {
+					var checked = isChecked(bill);
+					var statusTag = checked ? '<span class="tag checked">已核对</span>' : '<span class="tag pending">未核对</span>';
+					var checkButton = checked
+						? '<button class="link-btn warning check-bill" type="button" data-status="0"><svg class="icon" aria-hidden="true"><use href="#i-undo"></use></svg>取消核对</button>'
+						: '<button class="link-btn success check-bill" type="button" data-status="1"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>核对确认</button>';
+					return [
+						'<tr data-share-code="' + escapeHtml(bill.shareCode || '') + '">',
+						'<td><div class="meta-stack">',
+						'<div class="meta-line"><span class="meta-label">识别号：</span><span class="meta-value">' + escapeHtml(bill.shareCode || '-') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">生成时间：</span><span class="meta-value">' + escapeHtml(bill.createdTime || '-') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">核对状态：</span>' + statusTag + '</div>',
+						checked ? '<div class="meta-line"><span class="meta-label">核对时间：</span><span class="meta-value">' + escapeHtml(bill.checkedTime || '-') + '</span></div>' : '',
+						'</div></td>',
+						'<td><div class="meta-stack">',
+						'<div class="meta-line"><span class="meta-label">商家：</span><span class="meta-value">' + escapeHtml(bill.merchantName || '全部商家') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">编号：</span><span class="meta-value">' + escapeHtml(bill.merchantCode || bill.merchantId || '-') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">店铺：</span><span class="meta-value">' + escapeHtml(bill.shopName || '全部店铺') + '</span></div>',
+						'</div></td>',
+						'<td>' + escapeHtml(displayRange(bill)) + '</td>',
+						'<td><div class="meta-stack"><span class="tag">订单 ' + escapeHtml(bill.orderCount || 0) + '</span><span class="tag">偏远 ' + escapeHtml(bill.remoteCount || 0) + '</span><span class="tag warn">错误 ' + escapeHtml(bill.errorCount || 0) + '</span></div></td>',
+						'<td><span class="money">' + money(bill.totalAmount) + '</span></td>',
+						'<td><div class="action-group">',
+						checkButton,
+						'<button class="link-btn view-bill" type="button"><svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg>查看</button>',
+						'<button class="link-btn copy-link" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>复制链接</button>',
+						'<button class="link-btn copy-bill-info" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>复制账单信息</button>',
+						'<button class="link-btn export-bill" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>导出订单</button>',
+						'<button class="link-btn danger delete-bill" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>删除</button>',
+						'</div></td>',
+						'</tr>'
+					].join('');
+				}).join(''));
+			}
+			$('#billCount').text(totalBills);
+			$('#paginationTotal').text('共 ' + totalBills + ' 条');
+			$('#currentPage').text(currentPage);
+			$('#pageSizeSelect').val(String(pageSize));
+		}
+		function loadBills() {
+			pageSize = parseInt($('#pageSizeSelect').val(), 10) || 50;
+			$('#billRows').html('<tr class="loading-row"><td colspan="6">正在获取账单数据...</td></tr>');
+			return requestJson(API_BASE + '/getBills/index.php', filterPayload()).then(function (data) {
+				if (!data || !data.success || !Array.isArray(data.data)) { throw new Error(data && data.txt ? data.txt : '获取账单失败'); }
+				bills = data.data;
+				totalBills = parseInt(data.total || 0, 10) || 0;
+				currentPage = parseInt(data.page || currentPage, 10) || 1;
+				pageSize = parseInt(data.pageSize || pageSize, 10) || pageSize;
+				renderRows();
+			}).catch(function (error) {
+				bills = [];
+				totalBills = 0;
+				renderRows();
+				showToast(error.message || '获取账单失败');
+			});
+		}
+		function findBill($button) {
+			var code = $button.closest('tr').attr('data-share-code');
+			return bills.find(function (bill) { return bill.shareCode === code; }) || null;
+		}
+		function copyText(text) {
+			if (navigator.clipboard && window.isSecureContext) { return navigator.clipboard.writeText(text); }
+			var $textarea = $('<textarea readonly></textarea>').val(text).css({ position:'fixed', left:'-9999px', top:'0' });
+			$('body').append($textarea);
+			$textarea[0].select();
+			document.execCommand('copy');
+			$textarea.remove();
+			return Promise.resolve();
 		}
 
-		$('#checkAll').on('change', function () {
-			$('.row-check').prop('checked', this.checked);
+		$('#billRows').on('click', '.check-bill', function () {
+			var bill = findBill($(this));
+			var checkedStatus = parseInt($(this).attr('data-status'), 10);
+			if (!bill) { return; }
+			var actionText = checkedStatus === 1 ? '核对确认' : '取消核对';
+			confirmModal({
+				title: actionText,
+				message: '确定对账单 ' + bill.shareCode + ' 执行“' + actionText + '”吗？',
+				okText: '确定'
+			}).then(function (confirmed) {
+				if (!confirmed) { return; }
+				requestJson(API_BASE + '/checkBill/index.php', { shareCode: bill.shareCode, checkedStatus: checkedStatus }).then(function (data) {
+					if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : actionText + '失败'); }
+					showToast(actionText + '成功');
+					loadBills();
+				}).catch(function (error) { showToast(error.message || actionText + '失败'); });
+			});
 		});
-
-		$('#exportExcel').on('click', function () {
-			showToast('导出表格：演示操作');
+		$('#billRows').on('click', '.view-bill', function () {
+			var bill = findBill($(this));
+			if (bill) { window.open(billUrl(bill), '_blank'); }
 		});
-
-		$('#shareLink').on('click', function () {
-			showToast('分享链接已生成');
+		$('#billRows').on('click', '.copy-link', function () {
+			var bill = findBill($(this));
+			if (!bill) { return; }
+			copyText(billUrl(bill)).then(function () { showToast('分享链接已复制'); });
 		});
+		$('#billRows').on('click', '.copy-bill-info', function () {
+			var bill = findBill($(this));
+			if (!bill) { return; }
+			loadBillDetail(bill).then(function (detail) {
+				return copyText(billInfoText(detail));
+			}).then(function () {
+				showToast('账单信息已复制');
+			}).catch(function (error) {
+				showToast(error.message || '复制账单信息失败');
+			});
+		});
+		$('#billRows').on('click', '.export-bill', function () {
+			var bill = findBill($(this));
+			var $button = $(this);
+			if (!bill) { return; }
+			if (!window.XLSX) { showToast('XLSX 库未加载'); return; }
+			$button.prop('disabled', true).text('导出中');
+			loadBillDetail(bill).then(function (detail) {
+				var rows = exportRowsForBill(detail);
+				var sheet;
+				var workbook;
+				if (!rows.length) { throw new Error('账单没有可导出的订单'); }
+				rows.push({
+					'订单编号': '',
+					'订单状态': '',
+					'收件人': '',
+					'收件电话': '',
+					'省份': '',
+					'详细地址': '',
+					'快递公司': '',
+					'快递单号': '',
+					'发货内容': '合计总额：' + money(detail.totalAmount),
+					'商品数量': '',
+					'代发价': '',
+					'小记': money(detail.totalAmount),
+					'发货时间': '',
+					'打印时间': ''
+				});
+				sheet = XLSX.utils.json_to_sheet(rows, { header:exportHeaders });
+				workbook = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(workbook, sheet, '账单订单');
+				XLSX.writeFile(workbook, 'bill-' + (detail.shareCode || bill.shareCode || new Date().getTime()) + '.xlsx');
+				showToast('导出完成');
+			}).catch(function (error) {
+				showToast(error.message || '导出失败');
+			}).then(function () {
+				$button.prop('disabled', false).html('<svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>导出订单');
+			});
+		});
+		$('#billRows').on('click', '.delete-bill', function () {
+			var bill = findBill($(this));
+			if (!bill) { return; }
+			confirmModal({
+				title: '删除账单',
+				message: '确定删除账单 ' + bill.shareCode + ' 吗？',
+				okText: '继续',
+				danger: true
+			}).then(function (confirmed) {
+				if (!confirmed) { return false; }
+				return confirmModal({
+					title: '再次确认',
+					message: '删除后不可恢复，已核对账单也会从财务统计中扣减，继续删除？',
+					okText: '删除',
+					danger: true
+				});
+			}).then(function (confirmed) {
+				if (!confirmed) { return; }
+				requestJson(API_BASE + '/delBill/index.php', { shareCode: bill.shareCode }).then(function (data) {
+					if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : '删除账单失败'); }
+					showToast('账单已删除');
+					loadBills();
+				}).catch(function (error) { showToast(error.message || '删除账单失败'); });
+			});
+		});
+		$('#confirmOk').on('click', function () { closeConfirmModal(true); });
+		$('#confirmCancel, #confirmClose').on('click', function () { closeConfirmModal(false); });
+		$('#confirmModal').on('click', function (event) { if (event.target === this) { closeConfirmModal(false); } });
+		$(document).on('keydown', function (event) {
+			if (!$('#confirmModal').hasClass('show')) { return; }
+			if (event.key === 'Escape') { closeConfirmModal(false); }
+			if (event.key === 'Enter') { closeConfirmModal(true); }
+		});
+		$('#refreshBills').on('click', loadBills);
+		$('#searchBills').on('click', function () { currentPage = 1; loadBills(); });
+		$('#resetFilters').on('click', function () { $('#keyword, #merchantKeyword, #shopKeyword, #checkedStatus').val(''); setDefaultBillDateRange(); currentPage = 1; loadBills(); });
+		$('#keyword, #merchantKeyword, #shopKeyword').on('keydown', function (event) { if (event.key === 'Enter') { currentPage = 1; loadBills(); } });
+		$('#checkedStatus').on('change', function () { currentPage = 1; loadBills(); });
+		$('#billDateRange').on('click', function (event) {
+			event.stopPropagation();
+			openBillDateRangePicker(this);
+		});
+		$(document).on('click', '.dateTimeSelector-wraper .confirm-datetime', function () {
+			if ($('.dateTimeSelector-wraper').attr('target') === '#billDateRange') {
+				currentPage = 1;
+				loadBills();
+			}
+		});
+		$('#pageSizeSelect').on('change', function () { currentPage = 1; loadBills(); });
+		$('#prevPage').on('click', function () { if (currentPage > 1) { currentPage -= 1; loadBills(); } });
+		$('#nextPage').on('click', function () { if (currentPage * pageSize < totalBills) { currentPage += 1; loadBills(); } });
+		setDefaultBillDateRange();
+		loadBills();
 	});
 </script>
 </body>

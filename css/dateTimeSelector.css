@@ -2,6 +2,9 @@
 	float:left;
 	position: fixed;
 	width: 500px;
+	max-width: calc(100vw - 16px);
+	max-height: calc(100vh - 16px);
+	overflow: auto;
 	background-color: #FFF;
 	box-shadow: 0px 0px 20px 2px rgba(0,0,0,0.20);
 	border-radius: 4px;
@@ -158,4 +161,18 @@
 	background-color: #A79DFF;
 	border: solid 1px #CCC;
 	cursor: pointer;
+}
+@media (max-width: 560px){
+	.dateTimeSelector-wraper{
+		width: calc(100vw - 16px);
+	}
+	.dateTimeSelector-wraper .left,
+	.dateTimeSelector-wraper .right{
+		width: 100%;
+		padding-left: 0;
+		padding-right: 0;
+	}
+	.dateTimeSelector-wraper .right{
+		margin-top: 8px;
+	}
 }

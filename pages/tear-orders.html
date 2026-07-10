@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>撕单拦截</title>
+<style>
+:root{--bg:#f3f6fb;--panel:#fff;--line:#dfe5ef;--line-soft:#edf1f7;--text:#1f2937;--muted:#6b7280;--blue:#3e7cff;--blue-dark:#2f6dec;--green:#13a66b;--red:#d93025;--amber:#b7791f}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;font-family:Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font-family:inherit}.tear-page{min-height:100%;padding:14px 14px 76px}.toolbar,.parse-panel,.table-panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,41,55,.06)}.toolbar,.parse-panel{padding:14px}.summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.page-title{margin:0;font-size:20px;line-height:28px}.record-count{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:6px;background:#eef4ff;color:var(--blue);font-size:13px;font-weight:700}.filter-grid,.parse-grid,.form-grid{display:grid;gap:10px}.filter-grid{grid-template-columns:minmax(150px,180px) minmax(150px,180px) minmax(220px,1fr) auto}.parse-grid{grid-template-columns:minmax(140px,180px) minmax(130px,150px) minmax(170px,210px) auto}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field label{font-size:12px;color:var(--muted)}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:6px;outline:0;background:#fff;color:var(--text);font-size:13px}.field input,.field select{height:34px;padding:0 10px}.field textarea{min-height:112px;padding:9px 10px;line-height:20px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(62,124,255,.12)}.wide{grid-column:1/-1}.actions,.bottom-tools,.dialog-head,.dialog-actions{display:flex;align-items:center;gap:8px}.actions{align-items:flex-end}.btn,.link-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--text);cursor:pointer;white-space:nowrap}.btn{height:34px;padding:0 14px;border-radius:6px;font-size:13px}.link-btn{height:28px;padding:0 10px;border-color:#cfe0ff;border-radius:5px;background:#f3f7ff;color:var(--blue);font-size:12px}.link-btn.icon-only{width:30px;padding:0;font-size:0}.btn:hover,.link-btn:hover{border-color:var(--blue);color:var(--blue)}.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn.primary:hover{background:var(--blue-dark);color:#fff}.btn.danger,.link-btn.danger{border-color:#ffd9d6;background:#fff5f4;color:var(--red)}.icon{width:15px;height:15px;flex:0 0 auto;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}.parse-panel,.table-panel{margin-top:14px}.parse-preview{margin-top:12px;border:1px solid var(--line-soft);border-radius:8px;overflow:hidden}.preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f8fafc;border-bottom:1px solid var(--line-soft);font-size:13px}.preview-list{max-height:220px;overflow:auto}.preview-item{display:grid;grid-template-columns:1.2fr 1.4fr .8fr 1fr;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:13px}.table-scroll{width:100%;overflow:auto}.tear-table{width:100%;min-width:980px;border-collapse:collapse}.tear-table th,.tear-table td{border-bottom:1px solid var(--line-soft);padding:12px;text-align:left;vertical-align:top;font-size:13px}.tear-table th{position:sticky;top:0;z-index:1;background:#f8fafc;color:#4b5563;font-weight:700}.tear-table tbody tr:hover{background:#fbfdff}.meta-stack{display:grid;gap:7px}.meta-line{display:flex;align-items:flex-start;gap:6px;line-height:20px}.meta-label{flex:0 0 auto;color:var(--muted)}.meta-value{min-width:0;word-break:break-all}.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:999px;background:#eef4ff;color:var(--blue);font-size:12px;font-weight:700}.tag.warning{background:#fff8e8;color:var(--amber)}.tag.danger{background:#fff5f4;color:var(--red)}.empty-row td,.loading-row td{padding:28px 12px;text-align:center;color:var(--muted)}.bottom-tools{position:fixed;left:0;right:0;bottom:0;justify-content:center;padding:12px 14px;background:rgba(31,41,55,.86);backdrop-filter:blur(8px)}.bottom-tools .btn{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff}.bottom-tools .btn:hover{border-color:#fff;color:#fff}.modal-backdrop{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.48)}.modal-backdrop.show{display:flex}.dialog{width:min(720px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:8px;background:#fff;box-shadow:0 18px 50px rgba(15,23,42,.26)}.dialog-head,.dialog-actions{justify-content:space-between;padding:14px;border-bottom:1px solid var(--line-soft)}.dialog-actions{justify-content:flex-end;border-top:1px solid var(--line-soft);border-bottom:0}.dialog-title{margin:0;font-size:18px;line-height:26px}.form-grid{grid-template-columns:repeat(2,minmax(180px,1fr));padding:14px}.form-grid .wide{grid-column:span 2}.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);z-index:30;display:none;padding:9px 14px;border-radius:6px;background:rgba(17,24,39,.92);color:#fff;font-size:13px}.toast.show{display:block}@media(max-width:900px){.filter-grid,.parse-grid{grid-template-columns:repeat(2,minmax(150px,1fr))}.actions{align-items:flex-start}.preview-item{grid-template-columns:1fr 1fr}}@media(max-width:680px){.tear-page{padding:10px 10px 88px}.summary-row{align-items:flex-start;flex-direction:column}.filter-grid,.parse-grid,.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.actions,.bottom-tools{flex-wrap:wrap}.actions .btn,.bottom-tools .btn{flex:1 1 120px}}
+</style>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true"><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol></svg>
+<div class="tear-page">
+	<section class="toolbar">
+		<div class="summary-row">
+			<h1 class="page-title">撕单拦截</h1>
+			<div class="record-count">记录总数：<span id="recordCount">0</span></div>
+		</div>
+		<div class="filter-grid">
+			<div class="field"><label for="actionFilter">类型</label><select id="actionFilter"><option value="all">全部类型</option><option value="撕单">撕单</option><option value="拦截">拦截</option></select></div>
+			<div class="field"><label for="expressFilter">快递名称</label><input id="expressFilter" type="text" placeholder="圆通快递"></div>
+			<div class="field"><label for="keyword">关键词</label><input id="keyword" type="text" placeholder="快递单号、备注"></div>
+			<div class="actions"><button class="btn primary" type="button" id="searchButton"><svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>搜索</button><button class="btn" type="button" id="resetButton"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>重置</button></div>
+		</div>
+	</section>
+	<section class="parse-panel">
+		<div class="parse-grid">
+			<div class="field"><label for="defaultExpressName">默认快递</label><input id="defaultExpressName" type="text" value="圆通快递"></div>
+			<div class="field"><label for="defaultActionType">默认类型</label><select id="defaultActionType"><option value="撕单">撕单</option><option value="拦截">拦截</option></select></div>
+			<div class="field"><label for="defaultActionTime">默认时间</label><input id="defaultActionTime" type="text" placeholder="YYYY-MM-DD HH:mm:ss"></div>
+			<div class="actions"><button class="btn" type="button" id="parseButton"><svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>识别</button><button class="btn primary" type="button" id="saveParsedButton"><svg class="icon" aria-hidden="true"><use href="#i-save"></use></svg>保存识别结果</button></div>
+			<div class="field wide"><label for="rawInput">粘贴撕单/拦截内容</label><textarea id="rawInput" placeholder="圆通快递 YT0054008540890 撕单&#10;YT0051975444547&#10;YT0052816868896 YT0052816868896 拦截"></textarea></div>
+		</div>
+		<div class="parse-preview">
+			<div class="preview-head"><span>识别结果：<strong id="parseCount">0</strong> 条</span><span class="meta-value">重复单号会自动合并，后出现的内容优先。</span></div>
+			<div class="preview-list" id="previewList"><div class="empty-row"><table><tr><td>暂无识别结果</td></tr></table></div></div>
+		</div>
+	</section>
+	<section class="table-panel">
+		<div class="table-scroll">
+			<table class="tear-table">
+				<thead><tr><th>快递信息</th><th>快递单号</th><th>类型</th><th>时间</th><th>备注</th><th>操作</th></tr></thead>
+				<tbody id="recordList"><tr class="loading-row"><td colspan="6">正在获取记录...</td></tr></tbody>
+			</table>
+		</div>
+	</section>
+</div>
+<div class="bottom-tools"><button class="btn" type="button" id="addButton"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>新增记录</button><button class="btn" type="button" id="refreshButton"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>刷新</button></div>
+<div class="modal-backdrop" id="recordModal"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 class="dialog-title" id="dialogTitle">新增记录</h2><button class="btn" type="button" id="closeModalButton"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg>关闭</button></div><form id="recordForm"><input type="hidden" id="recordId"><div class="form-grid"><div class="field"><label for="expressName">快递名称</label><input id="expressName" type="text"></div><div class="field"><label for="waybillNumber">快递单号</label><input id="waybillNumber" type="text" required></div><div class="field"><label for="actionType">类型</label><select id="actionType"><option value="撕单">撕单</option><option value="拦截">拦截</option></select></div><div class="field"><label for="actionTime">时间</label><input id="actionTime" type="text" placeholder="YYYY-MM-DD HH:mm:ss"></div><div class="field wide"><label for="remark">备注</label><input id="remark" type="text"></div></div><div class="dialog-actions"><button class="btn primary" type="submit" id="saveButton"><svg class="icon" aria-hidden="true"><use href="#i-save"></use></svg>保存</button></div></form></div></div>
+<div class="toast" id="toast">已保存</div>
+<script>
+(function(){
+	'use strict';
+	var API_BASE='../api';
+	var records=[];
+	var parsedRecords=[];
+	var toast=document.getElementById('toast');
+	var modal=document.getElementById('recordModal');
+	var WAYBILL_RE=/[A-Za-z]{1,6}\d{6,24}|\d{10,24}/g;
+	function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+	function getToken(){try{return (JSON.parse(localStorage.getItem('orders-token')||'{}').token||'').trim()}catch(e){return ''}}
+	function requestJson(endpoint,payload){return fetch(API_BASE+endpoint,{method:'POST',headers:{'Content-Type':'application/json;charset=UTF-8','token':getToken()},body:JSON.stringify(payload||{}),redirect:'follow'}).then(function(res){return res.json()})}
+	function showToast(text){toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(function(){toast.classList.remove('show')},1600)}
+	function nowText(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
+	function normalizeWaybill(value){return String(value||'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+	function actionFromText(text,fallback){return text.indexOf('拦截')>-1?'拦截':(text.indexOf('撕单')>-1?'撕单':fallback)}
+	function expressFromLine(line,firstIndex,fallback){
+		var before=firstIndex>0?line.slice(0,firstIndex):'';
+		before=before.replace(/撕单|拦截/g,'').replace(/[：:，,;；|]+/g,' ').trim();
+		return before||fallback||'';
+	}
+	function parseRawText(){
+		var raw=document.getElementById('rawInput').value||'';
+		var defaultExpress=document.getElementById('defaultExpressName').value.trim();
+		var defaultAction=document.getElementById('defaultActionType').value||'撕单';
+		var defaultTime=document.getElementById('defaultActionTime').value.trim()||nowText();
+		var currentExpress=defaultExpress;
+		var currentAction=defaultAction;
+		var map={};
+		raw.split(/\r?\n/).forEach(function(line){
+			var text=line.trim();
+			var matches;
+			var firstIndex;
+			var lineAction;
+			var lineExpress;
+			if(!text){return}
+			matches=text.match(WAYBILL_RE)||[];
+			lineAction=actionFromText(text,currentAction);
+			currentAction=lineAction;
+			if(!matches.length){
+				currentExpress=expressFromLine(text,text.length,currentExpress);
+				return;
+			}
+			firstIndex=text.search(WAYBILL_RE);
+			lineExpress=expressFromLine(text,firstIndex,currentExpress);
+			currentExpress=lineExpress||currentExpress;
+			matches.forEach(function(item){
+				var waybill=normalizeWaybill(item);
+				if(!waybill){return}
+				map[waybill]={expressName:currentExpress,waybillNumber:waybill,actionType:lineAction,actionTime:defaultTime,remark:''};
+			});
+		});
+		parsedRecords=Object.keys(map).map(function(key){return map[key]});
+		renderPreview();
+	}
+	function renderPreview(){
+		document.getElementById('parseCount').textContent=parsedRecords.length;
+		if(!parsedRecords.length){
+			document.getElementById('previewList').innerHTML='<div class="preview-item"><span class="meta-value">暂无识别结果</span></div>';
+			return;
+		}
+		document.getElementById('previewList').innerHTML=parsedRecords.map(function(item){
+			return '<div class="preview-item"><span>'+esc(item.expressName||'-')+'</span><strong>'+esc(item.waybillNumber)+'</strong><span class="tag '+(item.actionType==='拦截'?'warning':'')+'">'+esc(item.actionType)+'</span><span>'+esc(item.actionTime)+'</span></div>';
+		}).join('');
+	}
+	function matchesFilter(item){
+		var action=document.getElementById('actionFilter').value;
+		var express=document.getElementById('expressFilter').value.trim();
+		var keyword=document.getElementById('keyword').value.trim().toLowerCase();
+		var text=[item.expressName,item.waybillNumber,item.actionType,item.remark].join(' ').toLowerCase();
+		if(action!=='all'&&item.actionType!==action){return false}
+		if(express&&String(item.expressName||'').indexOf(express)===-1){return false}
+		if(keyword&&text.indexOf(keyword)===-1){return false}
+		return true;
+	}
+	function render(){
+		var list=records.filter(matchesFilter);
+		document.getElementById('recordCount').textContent=list.length;
+		if(!list.length){
+			document.getElementById('recordList').innerHTML='<tr class="empty-row"><td colspan="6">暂无撕单拦截记录</td></tr>';
+			return;
+		}
+		document.getElementById('recordList').innerHTML=list.map(function(item){
+			return ['<tr data-id="'+esc(item.id)+'">',
+				'<td><div class="meta-stack"><div class="meta-line"><span class="meta-label">快递：</span><span class="meta-value">'+esc(item.expressName||'-')+'</span></div><div class="meta-line"><span class="meta-label">更新：</span><span class="meta-value">'+esc(item.updatedTime||'-')+'</span></div></div></td>',
+				'<td><strong>'+esc(item.waybillNumber||'-')+'</strong></td>',
+				'<td><span class="tag '+(item.actionType==='拦截'?'warning':'')+'">'+esc(item.actionType||'-')+'</span></td>',
+				'<td>'+esc(item.actionTime||'-')+'</td>',
+				'<td>'+esc(item.remark||'-')+'</td>',
+				'<td><button class="link-btn icon-only edit-record" type="button" title="修改" data-id="'+esc(item.id)+'"><svg class="icon" aria-hidden="true"><use href="#i-edit"></use></svg>修改</button> <button class="link-btn icon-only danger delete-record" type="button" title="删除" data-id="'+esc(item.id)+'"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>删除</button></td>',
+				'</tr>'].join('');
+		}).join('');
+	}
+	function loadRecords(){
+		if(!getToken()){showToast('请先在登录页输入密钥')}
+		document.getElementById('recordList').innerHTML='<tr class="loading-row"><td colspan="6">正在获取记录...</td></tr>';
+		return requestJson('/getTearOrders/index.php',{}).then(function(data){
+			if(!data||!data.success||!Array.isArray(data.data)){throw new Error(data&&data.txt?data.txt:'获取记录失败')}
+			records=data.data;
+			render();
+		}).catch(function(error){records=[];render();showToast(error.message||'获取记录失败')});
+	}
+	function findRecord(id){return records.filter(function(item){return String(item.id)===String(id)})[0]||null}
+	function openModal(item){
+		item=item||{};
+		document.getElementById('dialogTitle').textContent=item.id?'修改记录':'新增记录';
+		document.getElementById('recordId').value=item.id||'';
+		document.getElementById('expressName').value=item.expressName||document.getElementById('defaultExpressName').value.trim();
+		document.getElementById('waybillNumber').value=item.waybillNumber||'';
+		document.getElementById('actionType').value=item.actionType||document.getElementById('defaultActionType').value||'撕单';
+		document.getElementById('actionTime').value=item.actionTime||document.getElementById('defaultActionTime').value.trim()||nowText();
+		document.getElementById('remark').value=item.remark||'';
+		modal.classList.add('show');
+		document.getElementById('waybillNumber').focus();
+	}
+	function closeModal(){modal.classList.remove('show')}
+	function formPayload(){
+		var waybill=normalizeWaybill(document.getElementById('waybillNumber').value);
+		if(!waybill){showToast('请输入快递单号');return null}
+		return {id:document.getElementById('recordId').value,expressName:document.getElementById('expressName').value.trim(),waybillNumber:waybill,actionType:document.getElementById('actionType').value,actionTime:document.getElementById('actionTime').value.trim()||nowText(),remark:document.getElementById('remark').value.trim()};
+	}
+	function saveRecord(event){
+		event.preventDefault();
+		var payload=formPayload();
+		if(!payload){return}
+		if(!payload.id){delete payload.id}
+		document.getElementById('saveButton').disabled=true;
+		requestJson('/updateTearOrder/index.php',payload).then(function(data){
+			if(!data||!data.success){throw new Error(data&&data.txt?data.txt:'保存失败')}
+			showToast('记录已保存');
+			closeModal();
+			return loadRecords();
+		}).catch(function(error){showToast(error.message||'保存失败')}).finally(function(){document.getElementById('saveButton').disabled=false});
+	}
+	function saveParsed(){
+		if(!parsedRecords.length){parseRawText()}
+		if(!parsedRecords.length){showToast('没有识别到快递单号');return}
+		document.getElementById('saveParsedButton').disabled=true;
+		requestJson('/updateTearOrder/index.php',{records:parsedRecords}).then(function(data){
+			if(!data||!data.success){throw new Error(data&&data.txt?data.txt:'保存识别结果失败')}
+			showToast('已保存 '+(data.saved||parsedRecords.length)+' 条');
+			return loadRecords();
+		}).catch(function(error){showToast(error.message||'保存识别结果失败')}).finally(function(){document.getElementById('saveParsedButton').disabled=false});
+	}
+	function deleteRecord(id){
+		var item=findRecord(id);
+		if(!item){showToast('记录不存在');return}
+		if(!confirm('确定删除快递单号 '+item.waybillNumber+'？')){return}
+		requestJson('/delTearOrder/index.php',{id:id}).then(function(data){
+			if(!data||!data.success){throw new Error(data&&data.txt?data.txt:'删除失败')}
+			showToast('记录已删除');
+			return loadRecords();
+		}).catch(function(error){showToast(error.message||'删除失败')});
+	}
+	document.getElementById('defaultActionTime').value=nowText();
+	document.getElementById('parseButton').addEventListener('click',parseRawText);
+	document.getElementById('saveParsedButton').addEventListener('click',saveParsed);
+	document.getElementById('searchButton').addEventListener('click',render);
+	document.getElementById('resetButton').addEventListener('click',function(){document.getElementById('actionFilter').value='all';document.getElementById('expressFilter').value='';document.getElementById('keyword').value='';render()});
+	document.getElementById('refreshButton').addEventListener('click',loadRecords);
+	document.getElementById('addButton').addEventListener('click',function(){openModal(null)});
+	document.getElementById('closeModalButton').addEventListener('click',closeModal);
+	document.getElementById('recordModal').addEventListener('click',function(event){if(event.target===this){closeModal()}});
+	document.getElementById('recordForm').addEventListener('submit',saveRecord);
+	document.getElementById('recordList').addEventListener('click',function(event){
+		var edit=event.target.closest('.edit-record');
+		var del=event.target.closest('.delete-record');
+		if(edit){openModal(findRecord(edit.getAttribute('data-id')))}
+		if(del){deleteRecord(del.getAttribute('data-id'))}
+	});
+	['actionFilter','expressFilter','keyword'].forEach(function(id){
+		document.getElementById(id).addEventListener(id==='actionFilter'?'change':'keydown',function(event){
+			if(id==='actionFilter'||event.key==='Enter'){render()}
+		});
+	});
+	loadRecords();
+})();
+</script>
+</body>
+</html>

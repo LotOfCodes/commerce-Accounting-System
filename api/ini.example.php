@@ -6,5 +6,7 @@ class ini
 	public $mySqlDataBase = "orders";
 	public $mySqlServer = "127.0.0.1";
 	public $authorization = "your_api_token";
+	public $initialAdminUser = "admin";
+	public $initialAdminPass = "change_this_initial_admin_password";
 }
 ?>

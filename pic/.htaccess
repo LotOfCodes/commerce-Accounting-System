@@ -1,0 +1,12 @@
+Options -Indexes
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/gif .gif
+<FilesMatch "\.(php|phtml|phar|pl|py|cgi|asp|aspx|jsp|sh|bat|cmd)$">
+	<IfModule mod_authz_core.c>
+		Require all denied
+	</IfModule>
+	<IfModule !mod_authz_core.c>
+		Deny from all
+	</IfModule>
+</FilesMatch>

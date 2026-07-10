@@ -40,7 +40,12 @@
 		border-radius: 8px;
 		box-shadow: 0 8px 24px rgba(31, 41, 55, 0.06);
 	}
-	.toolbar { padding: 14px; }
+	.toolbar {
+		position: sticky;
+		top: 0;
+		z-index: 20;
+		padding: 14px;
+	}
 	.summary-row {
 		display: flex;
 		align-items: center;
@@ -66,13 +71,30 @@
 	.total-card { background: #fff5f4; color: var(--red); }
 	.stat-card.warning { background: #fff8e8; color: var(--amber); }
 	.stat-card.danger { background: #fff5f4; color: var(--red); }
+	.remote-jump,
+	.error-jump,
+	.unbound-jump {
+		border: 0;
+		cursor: pointer;
+	}
+	.remote-jump:hover {
+		box-shadow: inset 0 0 0 1px rgba(183, 121, 31, 0.28);
+	}
+	.error-jump:hover {
+		box-shadow: inset 0 0 0 1px rgba(217, 48, 37, 0.25);
+	}
+	.unbound-jump:hover {
+		box-shadow: inset 0 0 0 1px rgba(62, 124, 255, 0.24);
+	}
 	.filter-row {
 		display: grid;
-		grid-template-columns: minmax(140px, 180px) minmax(130px, 160px) minmax(130px, 160px) minmax(180px, 1fr) minmax(300px, 380px) auto;
+		grid-template-columns: minmax(130px, 170px) minmax(130px, 170px) minmax(120px, 150px) minmax(120px, 150px) minmax(120px, 150px) minmax(150px, 180px) minmax(150px, 180px) auto;
 		gap: 10px;
 		align-items: end;
 	}
 	.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+	.keyword-field { max-width: 180px; }
+	.date-range-field { grid-column: 1 / span 7; }
 	.field label { font-size: 12px; color: var(--muted); }
 	.field input,
 	.field select {
@@ -90,6 +112,28 @@
 	.field select:focus {
 		border-color: var(--blue);
 		box-shadow: 0 0 0 3px rgba(62, 124, 255, 0.12);
+	}
+	.field select:disabled {
+		cursor: not-allowed;
+		background: #f3f6fb;
+		color: var(--muted);
+	}
+	.quantity-filter {
+		display: grid;
+		gap: 6px;
+	}
+	.quantity-range-inputs {
+		display: none;
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+		align-items: center;
+		gap: 6px;
+	}
+	.quantity-range-inputs.show {
+		display: grid;
+	}
+	.quantity-range-sep {
+		color: var(--muted);
+		font-size: 13px;
 	}
 	.datetime-select {
 		display: inline-flex;
@@ -111,8 +155,13 @@
 	.datetime-select .time-line { width: 22px; height: 1px; margin: 0 9px; background: var(--line); }
 	.datetime-select .date { font-weight: 700; }
 	.datetime-select .time { color: var(--muted); }
+	.date-range-field .datetime-select { width: max-content; max-width: 100%; }
 	.action-row { display: flex; gap: 8px; }
 	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
 		height: 34px;
 		padding: 0 14px;
 		border: 1px solid var(--line);
@@ -127,9 +176,25 @@
 	.btn.primary { border-color: var(--blue); background: var(--blue); color: #fff; }
 	.btn.primary:hover { background: var(--blue-dark); color: #fff; }
 	.btn:disabled { cursor: not-allowed; opacity: 0.62; }
+	.icon {
+		width: 15px;
+		height: 15px;
+		flex: 0 0 auto;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		fill: none;
+	}
+	.icon-sprite {
+		position: absolute;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+	}
 	.table-panel { margin-top: 14px; overflow: hidden; }
 	.table-scroll { width: 100%; overflow: auto; }
-	.bill-table { width: 100%; min-width: 1180px; border-collapse: collapse; }
+	.bill-table { width: 100%; min-width: 1280px; border-collapse: collapse; }
 	.bill-table th,
 	.bill-table td {
 		border-bottom: 1px solid var(--line-soft);
@@ -139,11 +204,164 @@
 		font-size: 13px;
 	}
 	.bill-table th { position: sticky; top: 0; z-index: 1; background: #f8fafc; color: #4b5563; font-weight: 700; }
+	.bill-table tbody tr:hover { background: #fbfdff; }
+	.bill-table tbody tr[data-order-id] { cursor: pointer; }
+	.bill-table tbody tr.is-selected {
+		background: #eef4ff;
+		box-shadow: inset 4px 0 0 var(--blue);
+	}
+	.bill-table tr.remote-target,
+	.bill-table tr.error-target,
+	.bill-table tr.unbound-target {
+		background: #fffdf8;
+	}
+	.bill-table tr.remote-focus {
+		background: #fff8e8;
+		box-shadow: inset 4px 0 0 var(--amber);
+	}
+	.bill-table tr.error-focus {
+		background: #fff8e8;
+		box-shadow: inset 4px 0 0 var(--red);
+	}
+	.bill-table tr.unbound-focus {
+		background: #f7faff;
+		box-shadow: inset 4px 0 0 var(--blue);
+	}
+	.order-meta,
+	.shop-meta,
+	.bill-status-meta,
 	.meta-stack { display: grid; gap: 7px; }
 	.meta-line { display: flex; align-items: flex-start; gap: 6px; line-height: 20px; }
 	.meta-label { flex: 0 0 auto; color: var(--muted); }
 	.meta-value { min-width: 0; word-break: break-all; }
-	.money { color: var(--red); font-size: 15px; font-weight: 700; white-space: nowrap; }
+	.copy-btn {
+		flex: 0 0 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		height: 22px;
+		padding: 0 8px;
+		border: 1px solid #cfe0ff;
+		border-radius: 5px;
+		background: #f3f7ff;
+		color: var(--blue);
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.copy-btn .icon {
+		width: 12px;
+		height: 12px;
+	}
+	.goods-meta {
+		display: grid;
+		gap: 7px;
+	}
+	.goods-item {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 10px;
+		align-items: start;
+		padding: 10px;
+		border: 1px solid var(--line-soft);
+		border-radius: 8px;
+		background: #fbfdff;
+	}
+	.goods-item + .goods-item { margin-top: 8px; }
+	.goods-main {
+		display: grid;
+		grid-template-columns: 64px minmax(0, 1fr);
+		gap: 12px;
+		align-items: start;
+		min-width: 0;
+	}
+	.goods-thumb {
+		width: 64px;
+		height: 64px;
+		border: 1px solid var(--line-soft);
+		border-radius: 6px;
+		background: #f8fafc;
+		object-fit: cover;
+	}
+	.goods-detail {
+		display: grid;
+		gap: 7px;
+		min-width: 0;
+	}
+	.goods-title-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+	}
+	.goods-name {
+		min-width: 0;
+		font-weight: 700;
+		word-break: break-all;
+	}
+	.goods-qty {
+		flex: 0 0 auto;
+		color: var(--red);
+		font-weight: 700;
+		white-space: nowrap;
+	}
+	.goods-subline {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px 12px;
+		color: var(--muted);
+		line-height: 20px;
+	}
+	.goods-subline .meta-value { color: var(--text); }
+	.goods-subline a.meta-value {
+		color: var(--blue);
+		text-decoration: none;
+	}
+	.goods-subline a.meta-value:hover { text-decoration: underline; }
+	.goods-express {
+		display: grid;
+		gap: 6px;
+		padding: 8px 10px;
+		border: 1px solid #dbe7ff;
+		border-radius: 6px;
+		background: #f7faff;
+	}
+	.goods-cell-head {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		margin-bottom: 8px;
+	}
+	.icon-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		padding: 0;
+		border: 1px solid #cfe0ff;
+		border-radius: 6px;
+		background: #f3f7ff;
+		color: var(--blue);
+		cursor: pointer;
+		box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04);
+	}
+	.icon-btn:hover {
+		border-color: var(--blue);
+		background: #eef4ff;
+		color: var(--blue-dark);
+	}
+	.icon-btn:disabled {
+		cursor: not-allowed;
+		opacity: 0.62;
+	}
+	.icon-btn.is-loading .icon {
+		animation: spin 0.8s linear infinite;
+	}
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+	.money { color: var(--red); font-size: 16px; font-weight: 700; white-space: nowrap; }
 	.tag {
 		display: inline-flex;
 		align-items: center;
@@ -169,6 +387,16 @@
 		font-size: 13px;
 	}
 	.result-bar strong { color: var(--red); font-size: 18px; }
+	.result-link {
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.result-link:hover {
+		color: var(--red);
+	}
 	.bottom-tools {
 		position: fixed;
 		left: 0;
@@ -196,8 +424,119 @@
 		font-size: 13px;
 	}
 	.toast.show { display: block; }
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		display: none;
+		align-items: center;
+		justify-content: center;
+		padding: 18px;
+		background: rgba(15, 23, 42, 0.48);
+	}
+	.modal-backdrop.show { display: flex; }
+	.modal {
+		width: min(980px, 100%);
+		max-height: calc(100vh - 36px);
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		border-radius: 8px;
+		background: #fff;
+		box-shadow: 0 18px 50px rgba(15, 23, 42, 0.26);
+	}
+	.modal-head,
+	.modal-actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		padding: 14px;
+		border-bottom: 1px solid var(--line-soft);
+	}
+	.modal-actions {
+		justify-content: flex-end;
+		border-top: 1px solid var(--line-soft);
+		border-bottom: 0;
+	}
+	.modal-title {
+		margin: 0;
+		font-size: 18px;
+		line-height: 26px;
+	}
+	.modal-body {
+		overflow: auto;
+		display: grid;
+		gap: 14px;
+		padding: 14px;
+	}
+	.order-form {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(180px, 1fr));
+		gap: 12px;
+	}
+	.order-form .field.wide { grid-column: span 3; }
+	.order-form textarea {
+		width: 100%;
+		min-height: 78px;
+		padding: 9px 10px;
+		border: 1px solid var(--line);
+		border-radius: 6px;
+		outline: 0;
+		resize: vertical;
+		color: var(--text);
+		font: inherit;
+	}
+	.order-form textarea:focus {
+		border-color: var(--blue);
+		box-shadow: 0 0 0 3px rgba(62, 124, 255, 0.12);
+	}
+	.order-form input[readonly] {
+		background: #f8fafc;
+		color: var(--muted);
+		cursor: not-allowed;
+	}
+	.order-beans-panel {
+		display: grid;
+		gap: 10px;
+		margin-top: 4px;
+		padding-top: 14px;
+		border-top: 1px solid var(--line-soft);
+	}
+	.order-beans-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+	}
+	.order-beans-title {
+		margin: 0;
+		font-size: 15px;
+		line-height: 22px;
+	}
+	.bean-editor-list {
+		display: grid;
+		gap: 10px;
+	}
+	.bean-editor-row {
+		display: grid;
+		grid-template-columns: minmax(220px, 1.6fr) minmax(90px, .6fr) minmax(110px, .8fr) minmax(180px, 1.2fr) auto;
+		gap: 8px;
+		align-items: end;
+		padding: 10px;
+		border: 1px solid var(--line-soft);
+		border-radius: 8px;
+		background: #fbfdff;
+	}
+	.bean-editor-row .field { gap: 5px; }
+	.bean-editor-row .btn {
+		height: 34px;
+		padding: 0 10px;
+	}
 	@media (max-width: 1120px) {
 		.filter-row { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+		.date-range-field { grid-column: 1 / span 2; }
+		.bean-editor-row { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
 	}
 	@media (max-width: 760px) {
 		.bill-page { padding: 10px 10px 88px; }
@@ -206,38 +545,84 @@
 		.bottom-tools { align-items: stretch; flex-direction: column; }
 		.summary-cards { justify-content: flex-start; }
 		.filter-row { display: flex; flex-direction: column; }
+		.date-range-field .datetime-select { width: 100%; }
 		.action-row,
 		.bottom-tools { flex-direction: row; flex-wrap: wrap; }
 		.action-row .btn { flex: 1 1 120px; }
+		.datetime-select {
+			height: auto;
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 6px;
+			padding: 8px 10px;
+		}
+		.datetime-select .time-line {
+			width: 100%;
+			margin: 0;
+		}
+		.goods-main {
+			grid-template-columns: 52px minmax(0, 1fr);
+		}
+		.goods-thumb {
+			width: 52px;
+			height: 52px;
+		}
+		.goods-item { padding: 8px; }
+		.order-form { grid-template-columns: 1fr; }
+		.order-form .field.wide { grid-column: auto; }
+		.bean-editor-row { grid-template-columns: 1fr; }
 	}
 </style>
 </head>
 <body>
+	<svg class="icon-sprite" aria-hidden="true">
+		<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></symbol>
+		<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></symbol>
+		<symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 1 .7V2Z"></path><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></symbol>
+		<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></symbol>
+		<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></symbol>
+		<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></symbol>
+		<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol>
+		<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></symbol>
+	</svg>
 	<div class="bill-page">
 		<section class="toolbar">
 			<div class="summary-row">
 				<h1 class="page-title">生成账单</h1>
 				<div class="summary-cards">
-					<div class="total-card">统计总额：<span id="totalAmount">￥0.00</span></div>
+					<div class="total-card">统计总额：<span id="totalAmount">0.00</span></div>
 					<div class="stat-card">订单总数：<span id="orderCountTop">0</span></div>
-					<div class="stat-card warning">偏远地区订单：<span id="remoteCount">0</span></div>
-					<div class="stat-card danger">错误订单数：<span id="errorCount">0</span></div>
+					<button class="stat-card unbound-jump" type="button">未绑定订单数：<span id="unboundCount">0</span></button>
+					<button class="stat-card warning remote-jump" type="button">偏远地区订单：<span id="remoteCount">0</span></button>
+					<button class="stat-card danger error-jump" type="button">错误订单数：<span id="errorCount">0</span></button>
 				</div>
 			</div>
 			<div class="filter-row">
 				<div class="field">
 					<label for="merchantSelect">出账单商家编号</label>
 					<select id="merchantSelect">
-						<option value="DF08">DF08</option>
-						<option value="DF11">DF11</option>
-						<option value="all">全部商家</option>
+						<option value="all" selected>全部商家</option>
+					</select>
+				</div>
+				<div class="field">
+					<label for="shopSelect">店铺</label>
+					<select id="shopSelect">
+						<option value="all" selected>全部店铺</option>
 					</select>
 				</div>
 				<div class="field">
 					<label for="billStatus">账单范围</label>
 					<select id="billStatus">
 						<option value="ready">可出账订单</option>
-						<option value="all">全部订单</option>
+						<option value="all" selected>全部订单</option>
+					</select>
+				</div>
+				<div class="field">
+					<label for="orderTypeFilter">订单类型</label>
+					<select id="orderTypeFilter">
+						<option value="all" selected>全部类型</option>
+						<option value="1">手工订单</option>
+						<option value="2">平台订单</option>
 					</select>
 				</div>
 				<div class="field">
@@ -245,30 +630,47 @@
 					<select id="keywordType">
 						<option value="order">订单号</option>
 						<option value="express">快递单号</option>
+						<option value="goods">商品名</option>
 						<option value="mobile">手机号</option>
 					</select>
 				</div>
-				<div class="field">
+				<div class="field keyword-field">
 					<label for="keyword">搜索框</label>
-					<input id="keyword" type="text" placeholder="输入订单号、快递单号或手机号">
+					<input id="keyword" type="text" placeholder="输入关键词">
 				</div>
 				<div class="field">
+					<label for="quantityRangeFilter">商品数量范围</label>
+					<div class="quantity-filter">
+						<select id="quantityRangeFilter">
+							<option value="">全部数量</option>
+							<option value="single">单件</option>
+							<option value="multi">多件</option>
+							<option value="custom">输入数量</option>
+						</select>
+						<div class="quantity-range-inputs" id="quantityRangeInputs">
+							<input id="quantityMinFilter" type="number" min="0" step="1" inputmode="numeric" placeholder="最小">
+							<span class="quantity-range-sep">至</span>
+							<input id="quantityMaxFilter" type="number" min="0" step="1" inputmode="numeric" placeholder="最大">
+						</div>
+					</div>
+				</div>
+				<div class="field date-range-field">
 					<label for="adddate">生成账单日期范围</label>
 					<div class="datetime-select" id="adddate">
 						<div class="start-datetime">
-							<div class="date" year="2026" month="7" day="1">07-01</div>
+							<div class="date" year="2026" month="7" day="1">2026-07-01</div>
 							<div class="time" hour="00" minute="00" second="00">00:00:00</div>
 						</div>
 						<div class="time-line"></div>
 						<div class="end-datetime">
-							<div class="date" year="2026" month="7" day="3">07-03</div>
+							<div class="date" year="2026" month="7" day="3">2026-07-03</div>
 							<div class="time" hour="23" minute="59" second="59">23:59:59</div>
 						</div>
 					</div>
 				</div>
 				<div class="action-row">
-					<button class="btn primary" type="button" id="searchOrders">搜索订单</button>
-					<button class="btn" type="button" id="refreshOrders">刷新订单</button>
+					<button class="btn primary" type="button" id="searchOrders"><svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>搜索订单</button>
+					<button class="btn" type="button" id="refreshOrders"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>刷新订单</button>
 				</div>
 			</div>
 		</section>
@@ -279,7 +681,6 @@
 					<thead>
 						<tr>
 							<th>订单信息</th>
-							<th>商家编号</th>
 							<th>收货信息数量</th>
 							<th>发货内容</th>
 							<th>小计</th>
@@ -288,59 +689,121 @@
 						</tr>
 					</thead>
 					<tbody id="orderRows">
-						<tr class="loading-row"><td colspan="7">正在获取订单数据...</td></tr>
+						<tr class="loading-row"><td colspan="6">正在获取订单数据...</td></tr>
 					</tbody>
 				</table>
 			</div>
 			<div class="result-bar">
 				<span>订单数量：<span id="orderCount">0</span></span>
-				<span>偏远地区订单：<span id="remoteCountBottom">0</span></span>
-				<span>错误订单数：<span id="errorCountBottom">0</span></span>
-				<span>总额：<strong id="resultAmount">￥0.00</strong></span>
+				<button class="result-link unbound-jump" type="button">未绑定订单数：<span id="unboundCountBottom">0</span></button>
+				<button class="result-link remote-jump" type="button">偏远地区订单：<span id="remoteCountBottom">0</span></button>
+				<button class="result-link error-jump" type="button">错误订单数：<span id="errorCountBottom">0</span></button>
+				<span>总额：<strong id="resultAmount">0.00</strong></span>
 			</div>
 		</section>
 	</div>
 
 	<div class="bottom-tools">
-		<button class="btn primary" type="button" id="generateBill">生成账单</button>
-		<button class="btn" type="button" id="exportDraft">导出明细</button>
+		<button class="btn" type="button" id="editOrderButton"><svg class="icon" aria-hidden="true"><use href="#i-edit"></use></svg>编辑订单</button>
+		<button class="btn primary" type="button" id="generateBill"><svg class="icon" aria-hidden="true"><use href="#i-receipt"></use></svg>生成账单</button>
 	</div>
 	<div class="toast" id="toast">账单已生成</div>
 
-	<div class="dateTimeSelector-wraper">
-		<div class="left">
-			<div class="dateTimeSelector" bid="0">
-				<div class="dateTimeSelector-header">
-					<div class="month-slider">
-						<div class="slide-to-left"></div>
-						<div class="curr-date" month="07" year="2026">2026年07月</div>
-						<div class="slide-to-right"></div>
+	<div class="modal-backdrop" id="orderEditModal">
+		<div class="modal" role="dialog" aria-modal="true" aria-labelledby="orderEditTitle">
+			<div class="modal-head">
+				<h2 class="modal-title" id="orderEditTitle">修改订单</h2>
+				<button class="btn" type="button" id="closeOrderEdit">关闭</button>
+			</div>
+			<form id="orderEditForm">
+				<div class="modal-body">
+					<div class="order-form">
+						<div class="field">
+							<label for="editOrderId">订单编号</label>
+							<input id="editOrderId" name="orderId" type="text" required>
+						</div>
+						<div class="field">
+							<label for="editPlatId">平台单号</label>
+							<input id="editPlatId" name="platId" type="text">
+						</div>
+						<div class="field">
+							<label for="editOrderType">订单类型</label>
+							<select id="editOrderType" name="orderType">
+								<option value="1">手工单</option>
+								<option value="2">店铺单</option>
+							</select>
+						</div>
+						<div class="field">
+							<label for="editTradeStatus">订单状态</label>
+							<select id="editTradeStatus" name="tradeStatus">
+								<option value="待发货">待发货</option>
+								<option value="已发货">已发货</option>
+								<option value="已回收">已回收</option>
+							</select>
+						</div>
+						<div class="field">
+							<label for="editCustomer">商家编号</label>
+							<select id="editCustomer" name="customer"></select>
+						</div>
+						<div class="field">
+							<label for="editShopName">店铺名称</label>
+							<input id="editShopName" name="shopName" type="text">
+						</div>
+						<div class="field">
+							<label for="editReceiverName">收件人</label>
+							<input id="editReceiverName" name="receiverName" type="text" required>
+						</div>
+						<div class="field">
+							<label for="editReceiverMobile">收件电话</label>
+							<input id="editReceiverMobile" name="receiverMobile" type="text">
+						</div>
+						<div class="field">
+							<label for="editReceiverProvince">省份</label>
+							<input id="editReceiverProvince" name="receiverProvince" type="text">
+						</div>
+						<div class="field wide">
+							<label for="editReceiverAddress">详细地址</label>
+							<input id="editReceiverAddress" name="receiverAddress" type="text">
+						</div>
+						<div class="field">
+							<label for="editWaybillCom">快递公司</label>
+							<input id="editWaybillCom" name="waybillCom" type="text">
+						</div>
+						<div class="field">
+							<label for="editWaybillNumber">快递单号</label>
+							<input id="editWaybillNumber" name="waybillNumber" type="text">
+						</div>
+						<div class="field">
+							<label for="editWaybillTemplate">快递模板</label>
+							<input id="editWaybillTemplate" name="waybillTemplate" type="text">
+						</div>
+						<div class="field">
+							<label for="editDeliveryTime">发货时间</label>
+							<input id="editDeliveryTime" name="deliveryTime" type="text" placeholder="YYYY-MM-DD HH:mm:ss">
+						</div>
+						<div class="field">
+							<label for="editPrintTime">打印时间</label>
+							<input id="editPrintTime" name="printTime" type="text" placeholder="YYYY-MM-DD HH:mm:ss">
+						</div>
+						<div class="field wide">
+							<label for="editRemark">备注</label>
+							<textarea id="editRemark" name="remark"></textarea>
+						</div>
 					</div>
-					<div class="weeks">
-						<div class="week">一</div><div class="week">二</div><div class="week">三</div><div class="week">四</div><div class="week">五</div><div class="week">六</div><div class="week">日</div>
+					<div class="order-beans-panel">
+						<div class="order-beans-head">
+							<h3 class="order-beans-title">发货内容</h3>
+							<button class="btn" type="button" id="addEditBean"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>添加发货内容</button>
+						</div>
+						<div class="bean-editor-list" id="editBeansList"></div>
 					</div>
 				</div>
-				<div class="dates"></div>
-				<div class="time"><select class="clock"></select><div class="colon">:</div><select class="minute"></select><div class="colon">:</div><select class="second"></select></div>
-			</div>
-		</div>
-		<div class="right">
-			<div class="dateTimeSelector" bid="1">
-				<div class="dateTimeSelector-header">
-					<div class="month-slider">
-						<div class="slide-to-left"></div>
-						<div class="curr-date" month="07" year="2026">2026年07月</div>
-						<div class="slide-to-right"></div>
-					</div>
-					<div class="weeks">
-						<div class="week">一</div><div class="week">二</div><div class="week">三</div><div class="week">四</div><div class="week">五</div><div class="week">六</div><div class="week">日</div>
-					</div>
+				<div class="modal-actions">
+					<button class="btn" type="button" id="cancelOrderEdit">取消</button>
+					<button class="btn primary" type="submit" id="saveOrderEdit">保存订单</button>
 				</div>
-				<div class="dates"></div>
-				<div class="time"><select class="clock"></select><div class="colon">:</div><select class="minute"></select><div class="colon">:</div><select class="second"></select></div>
-			</div>
+			</form>
 		</div>
-		<div class="butons"><div class="buton confirm-datetime">确定</div></div>
 	</div>
 
 <script src="../js/jquery.min.js"></script>
@@ -348,15 +811,25 @@
 <script src="../js/dateTimeSelector.js"></script>
 <script>
 	$(function () {
-		var API_BASE = 'https://orders.8866.info/api';
-		var REMOTE_PROVINCES = ['内蒙古', '西藏', '甘肃', '青海', '宁夏', '新疆', '海南'];
+		var API_BASE = '../api';
+		var REMOTE_PROVINCES = ['辽宁', '吉林', '黑龙江', '内蒙古', '甘肃', '宁夏', '新疆', '西藏', '青海'];
 		var $toast = $('#toast');
 		var currentOrders = [];
 		var beansByOrder = {};
 		var productRules = [];
-		var summary = { total: 0, orderCount: 0, remoteCount: 0, errorCount: 0 };
+		var auditWeightByWaybill = {};
+		var tearOrderByWaybill = {};
+		var merchants = [];
+		var summary = { total: 0, orderCount: 0, remoteCount: 0, errorCount: 0, unboundCount: 0 };
+		var errorJumpIndex = -1;
+		var remoteJumpIndex = -1;
+		var unboundJumpIndex = -1;
+		var availableOrders = [];
+		var loadOrdersSeq = 0;
+		var ORDER_BEAN_CONCURRENCY = 4;
+		var selectedOrderId = '';
 
-		function money(value) { return '￥' + (Number(value) || 0).toFixed(2); }
+		function money(value) { return (Number(value) || 0).toFixed(2); }
 		function showToast(text) {
 			$toast.text(text).addClass('show');
 			window.clearTimeout(showToast.timer);
@@ -366,6 +839,21 @@
 			return String(value == null ? '' : value)
 				.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 				.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+		}
+		function matchKey(value) {
+			return String(value == null ? '' : value).toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
+		}
+		function normalizeWaybill(value) {
+			return String(value == null ? '' : value).toUpperCase().replace(/[^A-Z0-9]/g, '');
+		}
+		function extractWaybillNumbers(value) {
+			var text = String(value == null ? '' : value).toUpperCase();
+			var matches = text.match(/[A-Z]{1,6}\d{6,24}|\d{10,24}/g) || [];
+			return matches.map(normalizeWaybill).filter(Boolean);
+		}
+		function addMatchValue(values, value) {
+			var key = matchKey(value);
+			if (key) { values[key] = true; }
 		}
 		function getToken() {
 			try { return (JSON.parse(localStorage.getItem('orders-token') || '{}').token || '').trim(); }
@@ -378,6 +866,238 @@
 				body: JSON.stringify(postdata),
 				redirect: 'follow'
 			}).then(function (res) { return res.json(); });
+		}
+		function delay(ms) {
+			return new Promise(function (resolve) {
+				window.setTimeout(resolve, ms);
+			});
+		}
+		function requestJsonRetry(url, postdata, retries) {
+			var left = Math.max(0, parseInt(retries, 10) || 0);
+			return requestJson(url, postdata).then(function (data) {
+				if (data && data.success === false) {
+					throw new Error(data.txt || '请求失败');
+				}
+				return data;
+			}).catch(function (error) {
+				if (left <= 0) { throw error; }
+				return delay((4 - left) * 250).then(function () {
+					return requestJsonRetry(url, postdata, left - 1);
+				});
+			});
+		}
+		function pad2(value) {
+			value = parseInt(value, 10);
+			return (value < 10 ? '0' : '') + value;
+		}
+		function cellText(value) {
+			if (value == null) { return ''; }
+			if (value instanceof Date) { return formatDateTime(value); }
+			return String(value).trim();
+		}
+		function formatDateTime(date) {
+			return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate()) + ' ' + pad2(date.getHours()) + ':' + pad2(date.getMinutes()) + ':' + pad2(date.getSeconds());
+		}
+		function normalizeDateTime(value) {
+			var text = cellText(value);
+			var match;
+			if (!text) { return ''; }
+			match = text.match(/^(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+			if (match) {
+				return match[1] + '-' + pad2(match[2]) + '-' + pad2(match[3]) + ' ' + pad2(match[4] || 0) + ':' + pad2(match[5] || 0) + ':' + pad2(match[6] || 0);
+			}
+			return text;
+		}
+		function merchantLabel(merchant) {
+			var code = merchant.mid || '';
+			var name = merchant.merchantName || '';
+			return code && name ? code + ' - ' + name : (code || name || '-');
+		}
+		function shopValue(shop) { return shop.shopCode || shop.shopName || ''; }
+		function shopLabel(shop) {
+			var code = shop.shopCode || '';
+			var name = shop.shopName || '';
+			return code && name ? code + ' - ' + name : (name || code || '-');
+		}
+		function merchantShopValues(merchant) {
+			var values = {};
+			if (!merchant) { return values; }
+			if (merchant.id) { addMatchValue(values, merchant.id); }
+			if (merchant.mid) { addMatchValue(values, merchant.mid); }
+			if (merchant.merchantName) { addMatchValue(values, merchant.merchantName); }
+			if (Array.isArray(merchant.shops)) {
+				merchant.shops.forEach(function (shop) {
+					if (shop.shopCode) { addMatchValue(values, shop.shopCode); }
+					if (shop.shopName) { addMatchValue(values, shop.shopName); }
+				});
+			}
+			return values;
+		}
+		function orderShopOptionKeys(orders) {
+			var keys = {};
+			(orders || []).forEach(function (order) {
+				if (orderTypeValue(order.orderType) === '1') { return; }
+				addMatchValue(keys, order.shopName);
+				addMatchValue(keys, order.customer);
+			});
+			return keys;
+		}
+		function shopMatchesOrderShopKeys(shop, keys) {
+			return keys[matchKey(shopValue(shop))] || keys[matchKey(shop.shopCode)] || keys[matchKey(shop.shopName)];
+		}
+		function appendUnboundShopOptions(html, seen, selectedMerchantId) {
+			var merchant = selectedMerchantId && selectedMerchantId !== 'all' ? selectedMerchant() : null;
+			var merchantValues = merchantShopValues(merchant);
+			var boundShopNames = {};
+			merchants.forEach(function (item) {
+				if (!Array.isArray(item.shops)) { return; }
+				item.shops.forEach(function (shop) {
+					if (shop.shopName) { addMatchValue(boundShopNames, shop.shopName); }
+					if (shop.shopCode) { addMatchValue(boundShopNames, shop.shopCode); }
+				});
+			});
+			availableOrders.forEach(function (order) {
+				if (orderTypeValue(order.orderType) === '1') { return; }
+				var shopName = String(order.shopName || '').trim();
+				var customer = String(order.customer || '').trim();
+				var shopKey = matchKey(shopName);
+				if (!shopName || seen[shopKey] || boundShopNames[shopKey]) { return; }
+				if (merchant && !merchantValues[matchKey(customer)] && !merchantValues[shopKey]) { return; }
+				seen[shopKey] = true;
+				html += '<option value="' + escapeHtml(shopName) + '">' + escapeHtml(shopName + '(未绑定)') + '</option>';
+			});
+			return html;
+		}
+		function renderMerchantOptions() {
+			var selectedMerchant = $('#merchantSelect').val() || 'all';
+			var html = '<option value="all">全部商家</option>';
+			html += merchants.map(function (merchant) {
+				return '<option value="' + escapeHtml(merchant.id || '') + '" data-mid="' + escapeHtml(merchant.mid || '') + '">' + escapeHtml(merchantLabel(merchant)) + '</option>';
+			}).join('');
+			$('#merchantSelect').html(html).val(selectedMerchant);
+			if ($('#merchantSelect').val() !== selectedMerchant) { $('#merchantSelect').val('all'); }
+			renderShopOptions();
+		}
+		function renderEditMerchantOptions(selectedCustomer) {
+			var selected = String(selectedCustomer || '').trim();
+			var matchedValue = '';
+			var html = '<option value="">请选择商家</option>';
+			html += merchants.map(function (merchant) {
+				var code = String(merchant.mid || '').trim();
+				if (!code) { return ''; }
+				if (selected && (matchKey(selected) === matchKey(code) || matchKey(selected) === matchKey(merchant.id) || matchKey(selected) === matchKey(merchant.merchantName))) {
+					matchedValue = code;
+				}
+				return '<option value="' + escapeHtml(code) + '" data-id="' + escapeHtml(merchant.id || '') + '" data-mid="' + escapeHtml(code) + '">' + escapeHtml(merchantLabel(merchant)) + '</option>';
+			}).join('');
+			$('#editCustomer').html(html).val(matchedValue || '');
+		}
+		function currentSelectedMerchantCode() {
+			return $('#merchantSelect option:selected').attr('data-mid') || '';
+		}
+		function syncShopSelectLock() {
+			var isManual = $('#orderTypeFilter').val() === '1';
+			if (isManual) {
+				$('#shopSelect').val('all');
+			}
+			$('#shopSelect').prop('disabled', isManual);
+		}
+		function renderShopOptions() {
+			var selectedMerchant = $('#merchantSelect').val() || 'all';
+			var selectedShop = $('#shopSelect').val() || 'all';
+			var shops = [];
+			var shopOptionKeys = orderShopOptionKeys(availableOrders);
+			merchants.forEach(function (merchant) {
+				if (selectedMerchant !== 'all' && String(merchant.id || '') !== String(selectedMerchant)) { return; }
+				if (Array.isArray(merchant.shops)) { shops = shops.concat(merchant.shops); }
+			});
+			var seen = {};
+			var html = '<option value="all">全部店铺</option>';
+			shops.forEach(function (shop) {
+				var value = shopValue(shop);
+				var key = matchKey(value);
+				if (!value || seen[key] || !shopMatchesOrderShopKeys(shop, shopOptionKeys)) { return; }
+				seen[key] = true;
+				html += '<option value="' + escapeHtml(value) + '">' + escapeHtml(shopLabel(shop)) + '</option>';
+			});
+			html = appendUnboundShopOptions(html, seen, selectedMerchant);
+			$('#shopSelect').html(html).val(selectedShop);
+			if ($('#shopSelect').val() !== selectedShop) { $('#shopSelect').val('all'); }
+			syncShopSelectLock();
+		}
+		function loadMerchants() {
+			return requestJson(API_BASE + '/getMerchants/index.php', {}).then(function (data) {
+				merchants = data && data.success && Array.isArray(data.data) ? data.data : [];
+				renderMerchantOptions();
+			}).catch(function () {
+				merchants = [];
+				renderMerchantOptions();
+				showToast('获取商家店铺失败');
+			});
+		}
+		function selectedMerchant() {
+			var selectedId = $('#merchantSelect').val();
+			if (!selectedId || selectedId === 'all') { return null; }
+			return merchants.find(function (merchant) { return String(merchant.id || '') === String(selectedId); }) || null;
+		}
+		function selectedMerchantShopValues() {
+			var merchant = selectedMerchant();
+			var values = {};
+			if (!merchant || !Array.isArray(merchant.shops)) { return values; }
+			merchant.shops.forEach(function (shop) {
+				if (shop.shopCode) { addMatchValue(values, shop.shopCode); }
+				if (shop.shopName) { addMatchValue(values, shop.shopName); }
+			});
+			if (merchant.id) { addMatchValue(values, merchant.id); }
+			if (merchant.mid) { addMatchValue(values, merchant.mid); }
+			if (merchant.merchantName) { addMatchValue(values, merchant.merchantName); }
+			return values;
+		}
+		function merchantForOrder(order) {
+			var merchantId = String(order && order.merchantId || '').trim();
+			var merchantCode = String(order && order.merchantCode || '').trim();
+			var merchantName = String(order && order.merchantName || '').trim();
+			var customer = String(order && order.customer || '').trim();
+			var shopName = String(order && order.shopName || '').trim();
+			var keys = [merchantId, merchantCode, merchantName, customer, shopName].map(matchKey);
+			return merchants.find(function (merchant) {
+				if (keys.indexOf(matchKey(merchant.id)) > -1 || keys.indexOf(matchKey(merchant.mid)) > -1 || keys.indexOf(matchKey(merchant.merchantName)) > -1) {
+					return true;
+				}
+				return Array.isArray(merchant.shops) && merchant.shops.some(function (shop) {
+					return keys.indexOf(matchKey(shop.shopCode)) > -1 || keys.indexOf(matchKey(shop.shopName)) > -1;
+				});
+			}) || null;
+		}
+		function filterOrdersBySelectedMerchant(orders) {
+			var merchant = selectedMerchant();
+			var shop = $('#shopSelect').val();
+			var shopText = shop && shop !== 'all' ? ($('#shopSelect option:selected').text() || '') : '';
+			var shopName = shopText.indexOf('(未绑定)') > -1 ? shopText.replace(/\(未绑定\)$/, '') : shopText;
+			shopName = shopName.indexOf(' - ') > -1 ? shopName.split(' - ').slice(1).join(' - ') : shopName;
+			var values;
+			if (!merchant && (!shop || shop === 'all')) { return orders; }
+			values = selectedMerchantShopValues();
+			return orders.filter(function (order) {
+				var customer = String(order.customer || '').trim();
+				var orderShopName = String(order.shopName || '').trim();
+				var customerKey = matchKey(customer);
+				var orderShopKey = matchKey(orderShopName);
+				var selectedShopKey = matchKey(shop);
+				var selectedShopNameKey = matchKey(shopName);
+				if (merchant && !values[customerKey] && !values[orderShopKey]) { return false; }
+				if (shop && shop !== 'all' && customerKey !== selectedShopKey && orderShopKey !== selectedShopKey && orderShopKey !== selectedShopNameKey) { return false; }
+				return true;
+			});
+		}
+		function isUnboundShopOrder(order) {
+			var shopKey = matchKey(order && order.shopName);
+			if (!shopKey) { return false; }
+			return !merchants.some(function (merchant) {
+				return Array.isArray(merchant.shops) && merchant.shops.some(function (shop) {
+					return matchKey(shop.shopName) === shopKey || matchKey(shop.shopCode) === shopKey;
+				});
+			});
 		}
 		function datePart($node) {
 			var month = String($node.attr('month') || '').padStart(2, '0');
@@ -392,9 +1112,35 @@
 		function getStartTime() { return datePart($('#adddate .start-datetime .date')) + ' ' + timePart($('#adddate .start-datetime .time')); }
 		function getEndTime() { return datePart($('#adddate .end-datetime .date')) + ' ' + timePart($('#adddate .end-datetime .time')); }
 		function getBillDateRange() { return getStartTime() + ' 至 ' + getEndTime(); }
+		function compactDate(value) { return String(value || '').slice(0, 10).replace(/-/g, ''); }
+		function getCompactBillDateRange() { return compactDate(getStartTime()) + '~' + compactDate(getEndTime()); }
 		function statusText(value) {
 			var map = { '1': '待发货', '2': '已发货', '3': '已回收', 'WAIT_SEND': '待发货', 'SENT': '已发货', 'RECYCLED': '已回收' };
 			return map[value] || value || '-';
+		}
+		function orderTypeText(value) {
+			var map = {
+				'1': '手工订单',
+				'2': '平台订单',
+				'manual': '手工订单',
+				'shop': '平台订单',
+				'手工单': '手工订单',
+				'店铺单': '平台订单'
+			};
+			return map[value] || value || '-';
+		}
+		function orderTypeValue(value) {
+			var map = {
+				'1': '1',
+				'2': '2',
+				'manual': '1',
+				'shop': '2',
+				'手工单': '1',
+				'店铺单': '2',
+				'手工订单': '1',
+				'平台订单': '2'
+			};
+			return map[value] || '2';
 		}
 		function getOrderBeans(orderId) { return beansByOrder[orderId] || []; }
 		function getBeanQty(bean) {
@@ -406,29 +1152,87 @@
 			var match = text.match(/-?\d+(\.\d+)?/);
 			return match ? Number(match[0]) : 0;
 		}
+		function firstValue(source, keys) {
+			for (var i = 0; i < keys.length; i += 1) {
+				if (source && source[keys[i]] != null && source[keys[i]] !== '') { return source[keys[i]]; }
+			}
+			return '';
+		}
 		function normalizeName(value) { return String(value || '').toLowerCase().replace(/\s+/g, ''); }
-		function findProductRule(sku) {
-			var normalizedSku = normalizeName(sku);
-			if (!normalizedSku) { return null; }
+		function splitMatchRules(value) {
+			return String(value || '').split(/\r?\n/).map(function (rule) { return rule.trim(); }).filter(Boolean);
+		}
+		function parseDateTime(value) {
+			if (!value) { return null; }
+			var time = new Date(String(value).replace(' ', 'T')).getTime();
+			return isNaN(time) ? null : time;
+		}
+		function productName(rule) { return firstValue(rule, ['productName', 'product_name']); }
+		function productStart(rule) { return firstValue(rule, ['startTime', 'start_time']); }
+		function productEnd(rule) { return firstValue(rule, ['endTime', 'end_time']); }
+		function productRemotePrice(rule) { return firstValue(rule, ['remotePrice', 'far_price']); }
+		function productMultiPrice(rule) { return firstValue(rule, ['mPrice', 'm_price']); }
+		function productIsValid(rule, compareTime) {
+			var start = parseDateTime(productStart(rule));
+			var end = parseDateTime(productEnd(rule));
+			if (start && compareTime < start) { return false; }
+			if (end && compareTime > end) { return false; }
+			return true;
+		}
+		function productMatchesSku(rule, sku) {
+			var skuText = String(sku || '');
+			var normalizedSku = normalizeName(skuText);
+			var matchRules = splitMatchRules(rule && rule.matchRule);
+			if (!normalizedSku) { return false; }
+			if (matchRules.length) {
+				return matchRules.some(function (matchRule) {
+					try {
+						var reg = new RegExp(matchRule, 'i');
+						return reg.test(skuText) || reg.test(normalizedSku);
+					} catch (error) {
+						rule.matchError = '匹配规则格式错误';
+						return false;
+					}
+				});
+			}
+			var name = normalizeName(productName(rule));
+			return !!name && (normalizedSku.indexOf(name) > -1 || name.indexOf(normalizedSku) > -1);
+		}
+		function productMerchantMatchesOrder(rule, order) {
+			var ids = String(rule && rule.merchantIds || '').split(',').map(function (id) { return id.trim(); }).filter(Boolean);
+			var merchant;
+			if (!ids.length) { return true; }
+			if (order && order.merchantId && ids.indexOf(String(order.merchantId)) > -1) { return true; }
+			merchant = merchantForOrder(order);
+			return !!(merchant && ids.indexOf(String(merchant.id || '')) > -1);
+		}
+		function findProductRule(sku, order) {
+			var compareTime = Date.now();
 			return productRules.find(function (rule) {
-				var name = normalizeName(rule.product_name || rule.productName || '');
-				if (!name) { return false; }
-				return normalizedSku.indexOf(name) > -1 || name.indexOf(normalizedSku) > -1;
+				return productIsValid(rule, compareTime) && productMerchantMatchesOrder(rule, order) && productMatchesSku(rule, sku);
 			}) || null;
 		}
-		function hasRemotePrice(rule) { return numberFrom(rule && (rule.remotePrice || rule.far_price)) > 0; }
+		function productPrice(rule, qty) {
+			var multiPrice = numberFrom(productMultiPrice(rule));
+			var basePrice = numberFrom(rule && rule.price);
+			return qty > 1 && multiPrice > 0 ? multiPrice : basePrice;
+		}
 		function isRemoteOrder(order) {
 			var province = String(order.receiverProvince || '');
 			return REMOTE_PROVINCES.some(function (name) { return province.indexOf(name) > -1; });
 		}
 		function calcBean(bean, order) {
 			var qty = getBeanQty(bean);
-			var rule = findProductRule(bean.sku);
-			var unitPrice = numberFrom(rule && rule.price);
-			var remotePrice = isRemoteOrder(order) ? numberFrom(rule && (rule.remotePrice || rule.far_price)) : 0;
+			var rule = findProductRule(bean.sku, order);
+			var unitPrice = productPrice(rule, qty);
+			var remotePrice = isRemoteOrder(order) ? numberFrom(productRemotePrice(rule)) : 0;
 			var packPrice = numberFrom(rule && rule.packPrice);
 			var subtotal = (unitPrice * qty) + remotePrice + packPrice;
-			return { qty: qty, rule: rule, unitPrice: unitPrice, remotePrice: remotePrice, packPrice: packPrice, subtotal: subtotal, error: !rule || unitPrice <= 0 };
+			var tearRecord = tearRecordForBean(bean, order);
+			if (tearRecord) {
+				subtotal = 0;
+			}
+			return { qty: qty, rule: rule, unitPrice: unitPrice, remotePrice: remotePrice, packPrice: packPrice, subtotal: subtotal, error: !rule || unitPrice <= 0, tearRecord: tearRecord };
 		}
 		function calcOrder(order) {
 			var beans = getOrderBeans(order.orderId);
@@ -436,134 +1240,798 @@
 			var totalQty = 0;
 			var total = 0;
 			var hasError = !beans.length;
+			var hasTear = false;
 			beans.forEach(function (bean) {
 				var calc = calcBean(bean, order);
 				totalQty += calc.qty;
 				total += calc.subtotal;
 				if (calc.error) { hasError = true; }
+				if (calc.tearRecord) { hasTear = true; }
 			});
-			return { totalQty: totalQty, total: total, hasRemote: hasRemote, hasError: hasError };
+			return { totalQty: totalQty, total: total, hasRemote: hasRemote, hasError: hasError, hasTear: hasTear };
+		}
+		function getQuantityRangeFilter() {
+			var mode = $('#quantityRangeFilter').val();
+			var min;
+			var max;
+			if (!mode) { return null; }
+			if (mode === 'single') { return { min: 1, max: 1 }; }
+			if (mode === 'multi') { return { min: 2, max: Infinity }; }
+			if (mode === 'custom') {
+				min = Number($('#quantityMinFilter').val());
+				max = Number($('#quantityMaxFilter').val());
+				min = isNaN(min) ? 0 : min;
+				max = isNaN(max) ? Infinity : max;
+				if (min > max) { return { min: max, max: min }; }
+				return { min: min, max: max };
+			}
+			return null;
+		}
+		function updateQuantityRangeInputs() {
+			$('#quantityRangeInputs').toggleClass('show', $('#quantityRangeFilter').val() === 'custom');
+		}
+		function resetErrorJump() {
+			errorJumpIndex = -1;
+			remoteJumpIndex = -1;
+			unboundJumpIndex = -1;
+			$('#orderRows tr.error-focus, #orderRows tr.remote-focus, #orderRows tr.unbound-focus').removeClass('error-focus remote-focus unbound-focus');
+		}
+		function jumpToNextUnbound() {
+			var $targets = $('#orderRows tr.unbound-target');
+			var $target;
+			if (!$targets.length) {
+				showToast('暂无未绑定订单');
+				return;
+			}
+			unboundJumpIndex = (unboundJumpIndex + 1) % $targets.length;
+			$target = $targets.eq(unboundJumpIndex);
+			$('#orderRows tr.unbound-focus').removeClass('unbound-focus');
+			$target.addClass('unbound-focus');
+			$target[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+			showToast('定位未绑定订单 ' + (unboundJumpIndex + 1) + '/' + $targets.length);
+		}
+		function jumpToNextRemote() {
+			var $targets = $('#orderRows tr.remote-target');
+			var $target;
+			if (!$targets.length) {
+				showToast('暂无偏远地区订单');
+				return;
+			}
+			remoteJumpIndex = (remoteJumpIndex + 1) % $targets.length;
+			$target = $targets.eq(remoteJumpIndex);
+			$('#orderRows tr.remote-focus').removeClass('remote-focus');
+			$target.addClass('remote-focus');
+			$target[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+			showToast('定位偏远地区订单 ' + (remoteJumpIndex + 1) + '/' + $targets.length);
+		}
+		function jumpToNextError() {
+			var $targets = $('#orderRows tr.error-target');
+			var $target;
+			if (!$targets.length) {
+				showToast('暂无错误订单');
+				return;
+			}
+			errorJumpIndex = (errorJumpIndex + 1) % $targets.length;
+			$target = $targets.eq(errorJumpIndex);
+			$targets.removeClass('error-focus');
+			$target.addClass('error-focus');
+			$target[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+			showToast('定位错误订单 ' + (errorJumpIndex + 1) + '/' + $targets.length);
+		}
+		function quantityMatches(order) {
+			var range = getQuantityRangeFilter();
+			var totalQty;
+			if (!range) { return true; }
+			totalQty = calcOrder(order).totalQty;
+			return totalQty >= range.min && totalQty <= range.max;
+		}
+		function getBeanPicUrl(bean) {
+			return bean.picUrl || bean.pic_url || bean.imageUrl || bean.image || '';
+		}
+		function getBeanWaybill(bean, order) {
+			return bean.WaybillNumber || bean.waybillNumber || bean.waybillNumberText || order.waybillNumber || '-';
+		}
+		function getBeanCompany(bean, order) {
+			return bean.WaybillCom || bean.waybillCom || bean.waybillComText || order.waybillCom || '-';
+		}
+		function tearRecordForWaybill(waybill) {
+			var keys = extractWaybillNumbers(waybill);
+			var found = null;
+			keys.some(function (key) {
+				if (tearOrderByWaybill[key]) {
+					found = tearOrderByWaybill[key];
+					return true;
+				}
+				return false;
+			});
+			return found;
+		}
+		function tearRecordForBean(bean, order) {
+			return tearRecordForWaybill(getBeanWaybill(bean, order)) || tearRecordForWaybill(order && order.waybillNumber);
+		}
+		function imageLoaderUrl(picUrl) {
+			return '../tools/imageloader.php?picUrl=' + encodeURIComponent(picUrl);
+		}
+		function baiduWaybillUrl(waybill) {
+			return 'http://baidu.com/s?wd=' + encodeURIComponent(waybill);
+		}
+		function auditWeightForWaybill(waybill) {
+			var key = String(waybill || '').trim();
+			var found;
+			if (!key || key === '-') { return ''; }
+			if (auditWeightByWaybill[key]) { return auditWeightByWaybill[key].weight || ''; }
+			Object.keys(auditWeightByWaybill).some(function (itemKey) {
+				if (itemKey.indexOf(key) > -1 || key.indexOf(itemKey) > -1) {
+					found = auditWeightByWaybill[itemKey];
+					return true;
+				}
+				return false;
+			});
+			return found ? found.weight || '' : '';
+		}
+		function weightText(value) {
+			var n = numberFrom(value);
+			return n > 0 ? n + 'kg' : '-';
+		}
+		function renderGoodsReloadButton(order) {
+			return [
+				'<div class="goods-cell-head">',
+				'<button class="icon-btn reload-order-beans" type="button" title="重新加载发货内容" aria-label="重新加载发货内容" data-order-id="' + escapeHtml(order.orderId || '') + '">',
+				'<svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>',
+				'</button>',
+				'</div>'
+			].join('');
 		}
 		function renderGoods(order) {
 			var beans = getOrderBeans(order.orderId);
-			if (!beans.length) { return '<div class="meta-line"><span class="tag danger">缺少发货内容</span></div>'; }
-			return beans.map(function (bean) {
+			var reloadButton = renderGoodsReloadButton(order);
+			if (!beans.length) { return reloadButton + '<div class="meta-line"><span class="tag danger">缺少发货内容</span></div>'; }
+			return reloadButton + beans.map(function (bean) {
 				var calc = calcBean(bean, order);
-				var ruleName = calc.rule ? (calc.rule.product_name || calc.rule.productName || '-') : '未匹配产品';
+				var ruleName = calc.rule ? (productName(calc.rule) || '-') : '未匹配产品';
+				var productWeight = calc.rule ? (calc.rule.weight || '-') : '-';
+				var picUrl = getBeanPicUrl(bean);
+				var company = getBeanCompany(bean, order);
+				var waybill = getBeanWaybill(bean, order);
+				var auditWeight = auditWeightForWaybill(waybill);
+				var waybillLink = waybill && waybill !== '-' ? '<a class="meta-value copy-value" href="' + escapeHtml(baiduWaybillUrl(waybill)) + '" target="_blank" rel="noopener">' + escapeHtml(waybill) + '</a>' : '<span class="meta-value copy-value">-</span>';
+				var tearTag = calc.tearRecord ? '<span class="tag danger">' + escapeHtml(calc.tearRecord.actionType || '撕单') + '小计0</span>' : '';
+				var imageHtml = picUrl ? '<img class="goods-thumb" src="' + escapeHtml(imageLoaderUrl(picUrl)) + '" alt="' + escapeHtml(bean.sku || '商品图片') + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility=\'hidden\'">' : '<div class="goods-thumb" aria-hidden="true"></div>';
 				return [
-					'<div class="meta-stack">',
-					'<div class="meta-line"><span class="meta-label">商品：</span><span class="meta-value">' + escapeHtml(bean.sku || '-') + '</span></div>',
-					'<div class="meta-line"><span class="meta-label">匹配：</span><span class="meta-value">' + escapeHtml(ruleName) + '</span>' + (calc.error ? '<span class="tag danger">错误</span>' : '') + '</div>',
-					'<div class="meta-line"><span class="meta-label">数量：</span><span class="meta-value">' + escapeHtml(calc.qty) + '</span><span class="meta-label">重量：</span><span class="meta-value">' + escapeHtml(bean.weightActual || '-') + '</span></div>',
-					'<div class="meta-line"><span class="meta-label">金额：</span><span class="meta-value">单价 ' + money(calc.unitPrice) + '，偏远 ' + money(calc.remotePrice) + '，包装 ' + money(calc.packPrice) + '</span></div>',
+					'<div class="goods-meta goods-item">',
+					'<div class="goods-main">',
+					imageHtml,
+					'<div class="goods-detail">',
+					'<div class="goods-title-row"><span class="goods-name">' + escapeHtml(bean.sku || '-') + '</span><span class="goods-qty">x' + escapeHtml(calc.qty) + '</span></div>',
+					'<div class="meta-line"><span class="meta-label">匹配：</span><span class="meta-value">' + escapeHtml(ruleName) + '</span>' + (calc.error ? '<span class="tag danger">错误</span>' : '') + tearTag + '</div>',
+					'<div class="meta-line"><span class="meta-label">价格：</span><span class="meta-value">单价 ' + money(calc.unitPrice) + '，偏远 ' + money(calc.remotePrice) + '，包装 ' + money(calc.packPrice) + '</span></div>',
+					'<div class="meta-line"><span class="meta-label">重量：</span><span class="meta-value">预估 ' + escapeHtml(weightText(productWeight)) + '&nbsp;&nbsp;&nbsp;&nbsp;快递 ' + escapeHtml(weightText(auditWeight)) + '</span></div>',
+					'</div>',
+					'</div>',
+					'<div class="goods-express">',
+					'<div class="goods-subline"><span><span class="meta-label">快递：</span><span class="meta-value">' + escapeHtml(company) + '</span></span></div>',
+					'<div class="goods-subline"><span><span class="meta-label">单号：</span>' + waybillLink + '</span><button class="copy-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>复制</button></div>',
+					'</div>',
 					'</div>'
 				].join('');
 			}).join('');
 		}
 		function renderRows() {
 			var html = '';
-			summary = { total: 0, orderCount: currentOrders.length, remoteCount: 0, errorCount: 0 };
-			if (!currentOrders.length) {
-				html = '<tr class="empty-row"><td colspan="7">暂无订单数据</td></tr>';
+			var visibleOrders = currentOrders.filter(quantityMatches);
+			var visibleOrderIds = {};
+			summary = { total: 0, orderCount: visibleOrders.length, remoteCount: 0, errorCount: 0, unboundCount: 0 };
+			if (!visibleOrders.length) {
+				html = '<tr class="empty-row"><td colspan="6">暂无订单数据</td></tr>';
 			} else {
-				html = currentOrders.map(function (order) {
+				html = visibleOrders.map(function (order) {
 					var calc = calcOrder(order);
+					var hasUnbound = isUnboundShopOrder(order);
+					var orderId = String(order.orderId || '');
+					var rowClass = (hasUnbound ? 'unbound-target ' : '') + (calc.hasRemote ? 'remote-target ' : '') + (calc.hasError ? 'error-target ' : '') + (selectedOrderId && selectedOrderId === orderId ? 'is-selected' : '');
+					visibleOrderIds[orderId] = true;
 					summary.total += calc.total;
+					if (hasUnbound) { summary.unboundCount += 1; }
 					if (calc.hasRemote) { summary.remoteCount += 1; }
 					if (calc.hasError) { summary.errorCount += 1; }
 					return [
-						'<tr data-order-id="' + escapeHtml(order.orderId || '') + '">',
-						'<td><div class="meta-stack">',
-						'<div class="meta-line"><span class="meta-label">订单编号：</span><span class="meta-value">' + escapeHtml(order.orderId || '-') + '</span></div>',
-						'<div class="meta-line"><span class="meta-label">平台单号：</span><span class="meta-value">' + escapeHtml(order.platId || '-') + '</span></div>',
+						'<tr class="' + rowClass + '" data-order-id="' + escapeHtml(orderId) + '">',
+						'<td><div class="order-meta">',
+						'<div class="meta-line"><span class="meta-label">订单编号：</span><span class="meta-value copy-value">' + escapeHtml(order.orderId || '-') + '</span><button class="copy-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>复制</button></div>',
+						'<div class="meta-line"><span class="meta-label">平台单号：</span><span class="meta-value copy-value">' + escapeHtml(order.platId || '-') + '</span><button class="copy-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>复制</button></div>',
+						'<div class="meta-line"><span class="meta-label">订单类型：</span><span class="meta-value">' + escapeHtml(orderTypeText(order.orderType)) + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">商家名称：</span><span class="meta-value">' + escapeHtml(order.merchantName || '-') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">商家编号：</span><span class="meta-value">' + escapeHtml(order.merchantCode || order.merchantId || '-') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">店铺名称：</span><span class="meta-value">' + escapeHtml(order.shopName || '-') + '</span></div>',
+						'<div class="meta-line"><span class="meta-label">店铺编号：</span><span class="meta-value">' + escapeHtml(order.customer || '-') + '</span></div>',
 						'<div class="meta-line"><span class="meta-label">收件人：</span><span class="meta-value">' + escapeHtml(order.receiverName || '-') + ' ' + escapeHtml(order.receiverMobile || '-') + '</span></div>',
 						'<div class="meta-line"><span class="meta-label">地址：</span><span class="meta-value">' + escapeHtml((order.receiverProvince || '') + (order.receiverAddress || '')) + '</span></div>',
 						'</div></td>',
-						'<td>' + escapeHtml(order.customer || '-') + '</td>',
 						'<td>' + escapeHtml(calc.totalQty || getOrderBeans(order.orderId).length || 0) + '</td>',
 						'<td>' + renderGoods(order) + '</td>',
 						'<td><span class="money">' + money(calc.total) + '</span></td>',
-						'<td><div class="meta-stack">' + (calc.hasRemote ? '<span class="tag warning">偏远地区</span>' : '<span class="tag">正常</span>') + (calc.hasError ? '<span class="tag danger">需处理</span>' : '') + '<span>' + escapeHtml(statusText(order.tradeStatus)) + '</span></div></td>',
+						'<td><div class="bill-status-meta">' + (calc.hasRemote ? '<span class="tag warning">偏远地区</span>' : '<span class="tag">正常</span>') + (calc.hasTear ? '<span class="tag danger">撕单/拦截</span>' : '') + (calc.hasError ? '<span class="tag danger">需处理</span>' : '') + '<span>' + escapeHtml(statusText(order.tradeStatus)) + '</span></div></td>',
 						'<td>' + escapeHtml(order.deliveryTime || '-') + '</td>',
 						'</tr>'
 					].join('');
 				}).join('');
 			}
+			if (selectedOrderId && !visibleOrderIds[selectedOrderId]) { selectedOrderId = ''; }
 			$('#orderRows').html(html);
+			resetErrorJump();
 			updateSummary();
 		}
 		function updateSummary() {
 			$('#totalAmount, #resultAmount').text(money(summary.total));
 			$('#orderCount, #orderCountTop').text(summary.orderCount);
+			$('#unboundCount, #unboundCountBottom').text(summary.unboundCount);
 			$('#remoteCount, #remoteCountBottom').text(summary.remoteCount);
 			$('#errorCount, #errorCountBottom').text(summary.errorCount);
 		}
 		function setLoading() {
-			$('#orderRows').html('<tr class="loading-row"><td colspan="7">正在获取订单数据...</td></tr>');
-			summary = { total: 0, orderCount: 0, remoteCount: 0, errorCount: 0 };
+			$('#orderRows').html('<tr class="loading-row"><td colspan="6">正在获取订单数据...</td></tr>');
+			summary = { total: 0, orderCount: 0, remoteCount: 0, errorCount: 0, unboundCount: 0 };
 			updateSummary();
 		}
-		function loadBeans(orderId) {
-			return requestJson(API_BASE + '/getBeans/index.php', { orderId: orderId }).then(function (data) {
-				beansByOrder[orderId] = data && data.success && Array.isArray(data.data) ? data.data : [];
-			}).catch(function () { beansByOrder[orderId] = []; });
+		function billInfoText() {
+			return [
+				'===' + getCompactBillDateRange() + '===',
+				'订单总数:' + summary.orderCount,
+				'未绑定店铺:' + summary.unboundCount,
+				'偏远地区:' + summary.remoteCount,
+				'合计金额：' + money(summary.total)
+			].join('\n');
+		}
+		function fallbackCopy(text) {
+			var $textarea = $('<textarea readonly></textarea>').val(text).css({
+				position: 'fixed',
+				left: '-9999px',
+				top: '0'
+			});
+			$('body').append($textarea);
+			$textarea[0].select();
+			var success = false;
+			try { success = document.execCommand('copy'); }
+			catch (error) { success = false; }
+			$textarea.remove();
+			return success ? Promise.resolve() : Promise.reject(new Error('复制失败'));
+		}
+		function copyText(text) {
+			if (navigator.clipboard && window.isSecureContext) {
+				return navigator.clipboard.writeText(text).catch(function () { return fallbackCopy(text); });
+			}
+			return fallbackCopy(text);
+		}
+		function loadBeans(orderId, store) {
+			var target = store || beansByOrder;
+			return requestJsonRetry(API_BASE + '/getBeans/index.php', { orderId: orderId }, 3).then(function (data) {
+				target[orderId] = data && data.success && Array.isArray(data.data) ? data.data : [];
+			}).catch(function () { target[orderId] = []; });
+		}
+		function findOrderById(orderId) {
+			var id = String(orderId || '');
+			return currentOrders.concat(availableOrders).find(function (order) {
+				return String(order.orderId || '') === id;
+			}) || null;
+		}
+		function selectedOrder() {
+			return selectedOrderId ? findOrderById(selectedOrderId) : null;
+		}
+		function closeOrderEditModal() {
+			$('#orderEditModal').removeClass('show');
+		}
+		function setOrderEditValue(name, value) {
+			$('#orderEditForm [name="' + name + '"]').val(value == null ? '' : value);
+		}
+		function editBeanRow(bean) {
+			bean = bean || {};
+			return [
+				'<div class="bean-editor-row">',
+				'<input class="bean-order-id" type="hidden" value="' + escapeHtml(bean.orderId || '') + '">',
+				'<div class="field"><label>发货内容</label><input class="bean-sku" type="text" value="' + escapeHtml(bean.sku || '') + '"></div>',
+				'<div class="field"><label>数量</label><input class="bean-total" type="number" min="0" step="1" value="' + escapeHtml(bean.total || bean.quantity || '1') + '"></div>',
+				'<div class="field"><label>实际重量</label><input class="bean-weight-actual" type="text" value="' + escapeHtml(bean.weightActual || '') + '"></div>',
+				'<div class="field"><label>图片地址</label><input class="bean-pic-url" type="text" value="' + escapeHtml(getBeanPicUrl(bean)) + '"></div>',
+				'<button class="btn remove-edit-bean" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>删除</button>',
+				'</div>'
+			].join('');
+		}
+		function renderEditBeans(beans) {
+			var list = Array.isArray(beans) && beans.length ? beans : [{}];
+			$('#editBeansList').html(list.map(editBeanRow).join(''));
+		}
+		function beanPayload(order, bean, index) {
+			var beanOrderId = String(bean.orderId || '').trim() || (order.orderId + '-' + (index + 1));
+			return {
+				customer: order.customer,
+				parentOrderId: order.orderId,
+				orderId: beanOrderId,
+				parentPlatId: order.platId,
+				platId: order.platId,
+				orderType: order.orderType,
+				tradeStatus: order.tradeStatus,
+				shopName: order.shopName,
+				sku: bean.sku || '',
+				picUrl: bean.picUrl || '',
+				total: bean.total || '1',
+				weightActual: bean.weightActual || '',
+				deliveryTime: order.deliveryTime
+			};
+		}
+		function editBeansPayload(order) {
+			return $('#editBeansList .bean-editor-row').map(function (index) {
+				var $row = $(this);
+				var bean = {
+					orderId: ($row.find('.bean-order-id').val() || '').trim(),
+					sku: ($row.find('.bean-sku').val() || '').trim(),
+					total: ($row.find('.bean-total').val() || '').trim(),
+					weightActual: ($row.find('.bean-weight-actual').val() || '').trim(),
+					picUrl: ($row.find('.bean-pic-url').val() || '').trim()
+				};
+				if (!bean.sku && !bean.picUrl) { return null; }
+				if (!bean.total) { bean.total = '1'; }
+				return beanPayload(order, bean, index);
+			}).get().filter(Boolean);
+		}
+		function openOrderEditModal(order) {
+			var now = formatDateTime(new Date());
+			var selectedShopValue = $('#shopSelect').val();
+			order = order || {};
+			$('#orderEditTitle').text('修改订单');
+			$('#editOrderId').prop('readonly', true);
+			renderEditMerchantOptions(order.customer || order.merchantCode || currentSelectedMerchantCode() || '');
+			setOrderEditValue('orderId', order.orderId || '');
+			setOrderEditValue('platId', order.platId || '');
+			setOrderEditValue('orderType', orderTypeValue(order.orderType));
+			setOrderEditValue('tradeStatus', statusText(order.tradeStatus || '已发货'));
+			setOrderEditValue('shopName', order.shopName || (selectedShopValue === 'all' ? '' : selectedShopValue) || '');
+			setOrderEditValue('receiverName', order.receiverName || '');
+			setOrderEditValue('receiverMobile', order.receiverMobile || '');
+			setOrderEditValue('receiverProvince', order.receiverProvince || '');
+			setOrderEditValue('receiverAddress', order.receiverAddress || '');
+			setOrderEditValue('waybillCom', order.waybillCom || '');
+			setOrderEditValue('waybillNumber', order.waybillNumber || '');
+			setOrderEditValue('waybillTemplate', order.waybillTemplate || '');
+			setOrderEditValue('deliveryTime', order.deliveryTime || now);
+			setOrderEditValue('printTime', order.printTime || '');
+			setOrderEditValue('remark', order.remark || '');
+			renderEditBeans(getOrderBeans(order.orderId));
+			$('#orderEditModal').addClass('show');
+			$('#editReceiverName').focus();
+		}
+		function orderEditPayload() {
+			return {
+				customer: ($('#editCustomer').val() || '').trim(),
+				orderId: ($('#editOrderId').val() || '').trim(),
+				platId: ($('#editPlatId').val() || '').trim(),
+				orderType: $('#editOrderType').val() || '2',
+				tradeStatus: $('#editTradeStatus').val() || '已发货',
+				shopName: ($('#editShopName').val() || '').trim(),
+				receiverName: ($('#editReceiverName').val() || '').trim(),
+				receiverProvince: ($('#editReceiverProvince').val() || '').trim(),
+				receiverAddress: ($('#editReceiverAddress').val() || '').trim(),
+				receiverMobile: ($('#editReceiverMobile').val() || '').trim(),
+				remark: ($('#editRemark').val() || '').trim(),
+				waybillNumber: ($('#editWaybillNumber').val() || '').trim(),
+				waybillCom: ($('#editWaybillCom').val() || '').trim(),
+				waybillTemplate: ($('#editWaybillTemplate').val() || '').trim(),
+				deliveryTime: normalizeDateTime($('#editDeliveryTime').val()) || formatDateTime(new Date()),
+				printTime: normalizeDateTime($('#editPrintTime').val())
+			};
+		}
+		function saveOrderBeans(order, beans) {
+			return requestJson(API_BASE + '/updateBean/index.php', { parentOrderId: order.orderId, beans: beans }).then(function (data) {
+				if (!data || !data.success) {
+					throw new Error(data && data.txt ? data.txt : '保存发货内容失败');
+				}
+			});
+		}
+		function saveOrderEdit() {
+			var payload = orderEditPayload();
+			var beans;
+			if (!payload.orderId) {
+				showToast('请填写订单编号');
+				return;
+			}
+			if (!payload.receiverName) {
+				showToast('请填写收件人');
+				return;
+			}
+			if (!payload.customer) {
+				showToast('请选择已有商家');
+				return;
+			}
+			beans = editBeansPayload(payload);
+			$('#saveOrderEdit').prop('disabled', true).text('保存中...');
+			requestJson(API_BASE + '/updateOrder/index.php', payload).then(function (data) {
+				if (!data || !data.success) {
+					throw new Error(data && data.txt ? data.txt : '保存订单失败');
+				}
+				return saveOrderBeans(payload, beans);
+			}).then(function () {
+				showToast('订单已保存');
+				closeOrderEditModal();
+				selectedOrderId = payload.orderId;
+				return loadOrders();
+			}).catch(function (error) {
+				showToast(error.message || '保存订单失败');
+			}).then(function () {
+				$('#saveOrderEdit').prop('disabled', false).text('保存订单');
+			});
+		}
+		function openSelectedOrderEdit() {
+			var order = selectedOrder();
+			if (!order) {
+				showToast('请选择要编辑的订单');
+				return;
+			}
+			openOrderEditModal(order);
+		}
+		function reloadOrderBeans(orderId, button) {
+			var id = String(orderId || '').trim();
+			var $button = $(button);
+			if (!id) {
+				showToast('缺少订单编号');
+				return;
+			}
+			$button.prop('disabled', true).addClass('is-loading');
+			requestJsonRetry(API_BASE + '/getBeans/index.php', { orderId: id }, 3).then(function (data) {
+				beansByOrder[id] = data && data.success && Array.isArray(data.data) ? data.data : [];
+				renderRows();
+				showToast('发货内容已重新加载');
+			}).catch(function (error) {
+				showToast(error.message || '重新加载发货内容失败');
+			}).then(function () {
+				$button.prop('disabled', false).removeClass('is-loading');
+			});
+		}
+		function runLimited(items, limit, worker) {
+			var list = Array.isArray(items) ? items : [];
+			var max = Math.max(1, parseInt(limit, 10) || 1);
+			var index = 0;
+			var active = 0;
+			var stopped = false;
+			var results = [];
+			return new Promise(function (resolve, reject) {
+				function next() {
+					if (stopped) { return; }
+					if (index >= list.length && active === 0) {
+						resolve(results);
+						return;
+					}
+					while (active < max && index < list.length) {
+						(function (item, itemIndex) {
+							index += 1;
+							active += 1;
+							Promise.resolve().then(function () {
+								return worker(item, itemIndex);
+							}).then(function (result) {
+								results[itemIndex] = result;
+							}).catch(function (error) {
+								stopped = true;
+								reject(error);
+							}).then(function () {
+								active -= 1;
+								next();
+							});
+						})(list[index], index);
+					}
+				}
+				next();
+			});
 		}
 		function loadProductRules() {
-			return requestJson(API_BASE + '/getParentProducts/index.php', {}).then(function (data) {
+			return requestJson(API_BASE + '/getProducts/index.php', {}).then(function (data) {
 				productRules = data && data.success && Array.isArray(data.data) ? data.data : [];
 			}).catch(function () { productRules = []; });
 		}
-		function searchPayload() {
+		function loadAuditWeights() {
+			return requestJson(API_BASE + '/getOrderWeightInfo/index.php', {}).then(function (data) {
+				var auditItems = data && data.success && Array.isArray(data.auditItems) ? data.auditItems : [];
+				auditWeightByWaybill = {};
+				auditItems.forEach(function (item) {
+					var waybill = String(item && item.waybillNumber || '').trim();
+					if (waybill) {
+						auditWeightByWaybill[waybill] = item;
+					}
+				});
+			}).catch(function () { auditWeightByWaybill = {}; });
+		}
+		function loadTearOrders() {
+			return requestJson(API_BASE + '/getTearOrders/index.php', {}).then(function (data) {
+				tearOrderByWaybill = {};
+				if (data && data.success && Array.isArray(data.data)) {
+					data.data.forEach(function (item) {
+						var key = normalizeWaybill(item && item.waybillNumber);
+						if (key) { tearOrderByWaybill[key] = item; }
+					});
+				}
+			}).catch(function () { tearOrderByWaybill = {}; });
+		}
+		function searchPayload(page, size) {
+			var merchantId = $('#merchantSelect').val();
+			var orderType = $('#orderTypeFilter').val();
 			return {
-				page: 1,
-				pageSize: 500,
+				page: page || 1,
+				pageSize: size || 500,
 				startTime: getStartTime(),
 				endTime: getEndTime(),
-				merchant: $('#merchantSelect').val(),
+				merchantId: merchantId === 'all' ? '' : merchantId,
+				merchant: $('#merchantSelect option:selected').attr('data-mid') || $('#merchantSelect').val(),
+				shopName: orderType === '1' ? 'all' : $('#shopSelect').val(),
 				status: $('#billStatus').val() === 'ready' ? 'ready' : 'all',
+				orderType: orderType,
 				keywordType: $('#keywordType').val(),
 				keyword: ($('#keyword').val() || '').trim()
 			};
 		}
+		function responseTotal(data) {
+			var total = parseInt(data && data.total, 10);
+			return isNaN(total) ? 0 : total;
+		}
+		function fetchAllOrders(page, collected, expectedTotal) {
+			var size = 500;
+			return requestJson(API_BASE + '/getOrders/index.php', searchPayload(page, size)).then(function (data) {
+				var list;
+				var total;
+				if (!data || !data.success || !Array.isArray(data.data)) {
+					throw new Error(data && data.txt ? data.txt : '获取订单失败');
+				}
+				list = data.data;
+				total = expectedTotal == null ? responseTotal(data) : expectedTotal;
+				collected = collected.concat(list);
+				if (list.length && collected.length < total) {
+					return fetchAllOrders(page + 1, collected, total);
+				}
+				return collected;
+			});
+		}
+		function randomShareCode() {
+			var chars = '0123456789abcdef';
+			var code = '';
+			var values;
+			var i;
+			if (window.crypto && window.crypto.getRandomValues) {
+				values = new Uint32Array(16);
+				window.crypto.getRandomValues(values);
+				for (i = 0; i < values.length; i += 1) { code += chars[values[i] % chars.length]; }
+				return code;
+			}
+			for (i = 0; i < 16; i += 1) { code += chars[Math.floor(Math.random() * chars.length)]; }
+			return code;
+		}
+		function shareUrlFor(code) {
+			var base = window.location.href.split('#')[0].split('?')[0];
+			return base.replace(/bill-create\.html$/i, 'bill-share.html') + '?code=' + encodeURIComponent(code);
+		}
+		function selectedOrdersForBill() {
+			return currentOrders.filter(quantityMatches);
+		}
+		function selectedMerchantInfo() {
+			var merchant = selectedMerchant();
+			return {
+				id: $('#merchantSelect').val() === 'all' ? '' : $('#merchantSelect').val(),
+				code: $('#merchantSelect option:selected').attr('data-mid') || '',
+				name: merchant ? merchant.merchantName || '' : ''
+			};
+		}
+		function selectedShopInfo() {
+			var value = $('#shopSelect').val();
+			var text = $('#shopSelect option:selected').text() || '';
+			return {
+				code: value === 'all' ? '' : value,
+				name: value === 'all' ? '' : text
+			};
+		}
+		function orderSnapshot(order) {
+			var calc = calcOrder(order);
+			var beans = getOrderBeans(order.orderId);
+			return {
+				orderId: order.orderId || '',
+				platId: order.platId || '',
+				orderType: order.orderType || '',
+				tradeStatus: order.tradeStatus || '',
+				statusText: statusText(order.tradeStatus),
+				customer: order.customer || '',
+				merchantId: order.merchantId || '',
+				merchantCode: order.merchantCode || '',
+				merchantName: order.merchantName || '',
+				shopName: order.shopName || '',
+				receiverName: order.receiverName || '',
+				receiverMobile: order.receiverMobile || '',
+				receiverProvince: order.receiverProvince || '',
+				receiverAddress: order.receiverAddress || '',
+				deliveryTime: order.deliveryTime || '',
+				printTime: order.printTime || '',
+				totalQty: calc.totalQty,
+				amount: calc.total,
+				hasRemote: calc.hasRemote,
+				hasError: calc.hasError,
+				hasTear: calc.hasTear,
+				items: beans.map(function (bean) {
+					var beanCalc = calcBean(bean, order);
+					return {
+						sku: bean.sku || '',
+						quantity: beanCalc.qty,
+						agentPrice: beanCalc.unitPrice,
+						subtotal: beanCalc.subtotal,
+						waybillCom: getBeanCompany(bean, order),
+						waybillNumber: getBeanWaybill(bean, order),
+						weightActual: bean.weightActual || '',
+						tearActionType: beanCalc.tearRecord ? beanCalc.tearRecord.actionType || '' : '',
+						tearActionTime: beanCalc.tearRecord ? beanCalc.tearRecord.actionTime || '' : ''
+					};
+				})
+			};
+		}
+		function billPayload(shareCode, shareUrl) {
+			var merchant = selectedMerchantInfo();
+			var shop = selectedShopInfo();
+			var orders = selectedOrdersForBill();
+			return {
+				shareCode: shareCode,
+				shareUrl: shareUrl,
+				merchantId: merchant.id,
+				merchantCode: merchant.code,
+				merchantName: merchant.name,
+				shopCode: shop.code,
+				shopName: shop.name,
+				startTime: getStartTime(),
+				endTime: getEndTime(),
+				orderCount: summary.orderCount,
+				unboundCount: summary.unboundCount,
+				remoteCount: summary.remoteCount,
+				errorCount: summary.errorCount,
+				totalAmount: summary.total,
+				billText: billInfoText(),
+				orderData: orders.map(orderSnapshot)
+			};
+		}
+		function saveBill() {
+			var shareCode = randomShareCode();
+			var shareUrl = shareUrlFor(shareCode);
+			var payload = billPayload(shareCode, shareUrl);
+			if (!payload.orderCount) {
+				showToast('当前条件没有可生成的订单');
+				return Promise.resolve(null);
+			}
+			return requestJson(API_BASE + '/addBill/index.php', payload).then(function (data) {
+				if (!data || !data.success) {
+					throw new Error(data && data.txt ? data.txt : '保存账单失败');
+				}
+				return { shareCode: data.shareCode || shareCode, shareUrl: data.shareUrl || shareUrl };
+			});
+		}
 		function loadOrders() {
+			var requestId = loadOrdersSeq += 1;
 			if (!getToken()) { showToast('请先在登录页输入密钥'); }
 			setLoading();
 			$('#searchOrders, #refreshOrders').prop('disabled', true);
 			return Promise.all([
-				requestJson(API_BASE + '/getOrders/index.php', searchPayload()),
-				loadProductRules()
+				fetchAllOrders(1, [], null),
+				loadProductRules(),
+				loadAuditWeights(),
+				loadTearOrders()
 			]).then(function (results) {
-				var data = results[0];
-				if (!data || !data.success || !Array.isArray(data.data)) {
-					throw new Error(data && data.txt ? data.txt : '获取订单失败');
-				}
-				currentOrders = data.data;
-				beansByOrder = {};
-				return Promise.all(currentOrders.map(function (order) { return loadBeans(order.orderId); }));
-			}).then(function () {
+				var nextBeans = {};
+				if (requestId !== loadOrdersSeq) { return false; }
+				availableOrders = results[0];
+				renderShopOptions();
+				currentOrders = filterOrdersBySelectedMerchant(availableOrders);
+				return runLimited(currentOrders, ORDER_BEAN_CONCURRENCY, function (order) {
+					return loadBeans(order.orderId, nextBeans);
+				}).then(function () {
+					if (requestId !== loadOrdersSeq) { return false; }
+					beansByOrder = nextBeans;
+					return true;
+				});
+			}).then(function (active) {
+				if (!active) { return false; }
 				renderRows();
 				showToast('订单数据已更新');
+				return true;
 			}).catch(function (error) {
+				if (requestId !== loadOrdersSeq) { return false; }
 				currentOrders = [];
+				availableOrders = [];
 				beansByOrder = {};
+				renderShopOptions();
 				renderRows();
 				showToast(error.message || '获取订单失败');
+				return false;
 			}).finally(function () {
-				$('#searchOrders, #refreshOrders').prop('disabled', false);
+				if (requestId === loadOrdersSeq) {
+					$('#searchOrders, #refreshOrders').prop('disabled', false);
+				}
 			});
 		}
 
 		$('#searchOrders, #refreshOrders').on('click', loadOrders);
-		$('#keyword').on('keydown', function (event) { if (event.key === 'Enter') { loadOrders(); } });
-		$('#generateBill').on('click', function () {
+		$('#merchantSelect').on('change', function () {
+			renderShopOptions();
+			loadOrders();
+		});
+		$('#shopSelect').on('change', loadOrders);
+		$('#billStatus').on('change', loadOrders);
+		$('#orderTypeFilter').on('change', function () {
+			syncShopSelectLock();
+			loadOrders();
+		});
+		$('#quantityRangeFilter').on('change', function () {
+			updateQuantityRangeInputs();
 			renderRows();
-			showToast('账单已生成，' + getBillDateRange() + '，统计总额 ' + $('#resultAmount').text());
 		});
-		$('#exportDraft').on('click', function () {
-			showToast('导出明细：共 ' + summary.orderCount + ' 个订单');
+		$('#quantityMinFilter, #quantityMaxFilter').on('input change', renderRows);
+		$('#keyword').on('keydown', function (event) { if (event.key === 'Enter') { loadOrders(); } });
+		$(document).on('click', '.dateTimeSelector-wraper .confirm-datetime', function () {
+			if ($('.dateTimeSelector-wraper').attr('target') === '#adddate') {
+				loadOrders();
+			}
 		});
-
-		loadOrders();
+		$('#generateBill').on('click', function () {
+			loadOrders().then(function (active) {
+				if (!active) { return null; }
+				renderRows();
+				return saveBill();
+			}).then(function (bill) {
+				if (!bill) { return; }
+				return copyText(bill.shareUrl).then(function () {
+					showToast('账单已保存，分享链接已复制');
+				}).catch(function () {
+					showToast('账单已保存：' + bill.shareUrl);
+				});
+			}).catch(function (error) {
+				showToast(error.message || '保存账单失败');
+			});
+		});
+		$('.unbound-jump').on('click', jumpToNextUnbound);
+		$('.remote-jump').on('click', jumpToNextRemote);
+		$('.error-jump').on('click', jumpToNextError);
+		$('#editOrderButton').on('click', openSelectedOrderEdit);
+		$('#closeOrderEdit, #cancelOrderEdit').on('click', closeOrderEditModal);
+		$('#orderEditModal').on('click', function (event) {
+			if (event.target === this) { closeOrderEditModal(); }
+		});
+		$('#orderEditForm').on('submit', function (event) {
+			event.preventDefault();
+			saveOrderEdit();
+		});
+		$('#addEditBean').on('click', function () {
+			$('#editBeansList').append(editBeanRow({}));
+		});
+		$('#editBeansList').on('click', '.remove-edit-bean', function () {
+			$(this).closest('.bean-editor-row').remove();
+			if (!$('#editBeansList .bean-editor-row').length) {
+				$('#editBeansList').html(editBeanRow({}));
+			}
+		});
+		$('#orderRows').on('click', 'tr[data-order-id]', function (event) {
+			if ($(event.target).closest('button, a, input, select, textarea, label').length) {
+				return;
+			}
+			selectedOrderId = String($(this).attr('data-order-id') || '');
+			$('#orderRows tr[data-order-id]').removeClass('is-selected');
+			$(this).addClass('is-selected');
+		});
+		$('#orderRows').on('click', '.reload-order-beans', function () {
+			reloadOrderBeans($(this).attr('data-order-id'), this);
+		});
+		$('#orderRows').on('click', '.copy-btn', function () {
+			var value = $(this).closest('.meta-line, .goods-subline').find('.copy-value').first().text().trim();
+			if (!value || value === '-') {
+				showToast('没有可复制的内容');
+				return;
+			}
+			copyText(value).then(function () {
+				showToast('已复制：' + value);
+			}).catch(function () {
+				showToast('复制失败，请手动复制');
+			});
+		});
+		$('#merchantSelect, #shopSelect, #billStatus, #orderTypeFilter').val('all');
+		syncShopSelectLock();
+		updateQuantityRangeInputs();
+		loadMerchants().then(loadOrders);
 	});
 </script>
 </body>

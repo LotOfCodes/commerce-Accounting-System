@@ -1,42 +1,11 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>记账系统</title>
-	<link rel="stylesheet" href="css/all.css">
-	<link rel="stylesheet" href="css/index.css">	
-	<script src="js/jquery.min.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function(){
-			$('li').click(function(){
-				if (!$(this).hasClass('activited'))
-				{
-					$('.activited').removeClass('activited');
-					$(this).addClass('activited');
-					var url = $(this).attr('url');
-					$('iframe').attr('src',url);
-				}				
-			});		  
-		});
-	</script>
+<meta http-equiv="refresh" content="0;url=adminPanel.html">
+<title>管理后台</title>
 </head>
-
 <body>
-	<div class="main">
-		<div class="left">
-			<div class="logo-wraper"><div class="version">1.0</div><div class="logo-text">记账系统</div>
-			</div>
-			<ul>
-				<li class="activited" url="pages/orders.html">订单列表</li>
-				<li url="pages/products.html">产品列表</li>
-				<li url="pages/expresses.html">快递资费</li>
-				<li url="pages/bill-create.html">生成账单</li>
-				<li url="pages/bill-list.html">账单列表</li>
-			</ul>
-		</div>
-		<div class="right">
-			<iframe src="pages/orders.html"></iframe>
-		</div>
-	</div>
+	<script>window.location.replace('adminPanel.html');</script>
 </body>
 </html>

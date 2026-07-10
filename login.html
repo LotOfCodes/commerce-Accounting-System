@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>&#30331;&#24405; - &#35760;&#36134;&#31995;&#32479;</title>
+<title>登录 - 记账系统</title>
 <style>
 	html, body {
 		width: 100%;
@@ -22,7 +22,7 @@
 		box-sizing: border-box;
 	}
 	.login-box {
-		width: 360px;
+		width: 380px;
 		max-width: 100%;
 		padding: 32px;
 		background: #fff;
@@ -36,6 +36,9 @@
 		font-size: 24px;
 		line-height: 32px;
 		text-align: center;
+	}
+	.form-row {
+		margin-bottom: 16px;
 	}
 	.form-label {
 		display: block;
@@ -60,7 +63,7 @@
 	}
 	.error-text {
 		min-height: 20px;
-		margin: 10px 0 14px;
+		margin: 2px 0 14px;
 		font-size: 13px;
 		line-height: 20px;
 		color: #d93025;
@@ -79,39 +82,69 @@
 	.login-button:hover {
 		background: #2f6dec;
 	}
-	.login-button:active {
-		background: #255fd7;
+	.login-button:disabled {
+		background: #9bb8f8;
+		cursor: default;
 	}
 </style>
 </head>
 <body>
 	<div class="login-page">
 		<form class="login-box" id="loginForm" autocomplete="off">
-			<h1 class="login-title">&#35760;&#36134;&#31995;&#32479;</h1>
-			<label class="form-label" for="tokenInput">&#23494;&#38053;</label>
-			<input class="key-input" id="tokenInput" name="token" type="password" placeholder="&#35831;&#36755;&#20837;&#23494;&#38053;" autofocus>
+			<h1 class="login-title">记账系统管理后台</h1>
+			<div class="form-row">
+				<label class="form-label" for="usernameInput">管理员账号</label>
+				<input class="key-input" id="usernameInput" name="username" type="text" placeholder="请输入管理员账号" value="admin" autofocus>
+			</div>
+			<div class="form-row">
+				<label class="form-label" for="passwordInput">管理员密码</label>
+				<input class="key-input" id="passwordInput" name="password" type="password" placeholder="请输入管理员密码">
+			</div>
 			<div class="error-text" id="errorText"></div>
-			<button class="login-button" type="submit">&#30331;&#24405;</button>
+			<button class="login-button" id="loginButton" type="submit">登录</button>
 		</form>
 	</div>
 	<script>
 		(function () {
 			var form = document.getElementById('loginForm');
-			var tokenInput = document.getElementById('tokenInput');
+			var usernameInput = document.getElementById('usernameInput');
+			var passwordInput = document.getElementById('passwordInput');
 			var errorText = document.getElementById('errorText');
+			var button = document.getElementById('loginButton');
 
 			form.addEventListener('submit', function (event) {
 				event.preventDefault();
-				var token = tokenInput.value.trim();
+				var username = usernameInput.value.trim();
+				var password = passwordInput.value;
 
-				if (!token) {
-					errorText.textContent = '\u8bf7\u8f93\u5165\u5bc6\u94a5';
-					tokenInput.focus();
+				if (!username || !password) {
+					errorText.textContent = '请输入管理员账号和密码';
 					return;
 				}
 
-				localStorage.setItem('orders-token', JSON.stringify({ token: token }));
-				window.location.href = 'index.html';
+				button.disabled = true;
+				button.textContent = '登录中...';
+				errorText.textContent = '';
+				fetch('api/adminLogin/index.php', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+					body: JSON.stringify({ username: username, password: password })
+				}).then(function (res) {
+					return res.json();
+				}).then(function (data) {
+					if (!data || !data.success) {
+						throw new Error((data && data.txt) || '登录失败');
+					}
+					localStorage.setItem('orders-admin-session', JSON.stringify({ token: data.token, username: data.username }));
+					if (data.apiToken) {
+						localStorage.setItem('orders-token', JSON.stringify({ token: data.apiToken }));
+					}
+					window.location.href = 'adminPanel.html';
+				}).catch(function (err) {
+					errorText.textContent = err.message || '登录失败';
+					button.disabled = false;
+					button.textContent = '登录';
+				});
 			});
 		})();
 	</script>

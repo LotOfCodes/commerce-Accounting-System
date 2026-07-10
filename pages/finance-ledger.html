@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>财务统计</title>
+<link rel="stylesheet" href="../css/dateTimeSelector.css">
+<style>
+	:root { --bg:#f3f6fb; --panel:#fff; --line:#dfe5ef; --line-soft:#edf1f7; --text:#1f2937; --muted:#6b7280; --blue:#3e7cff; --blue-dark:#2f6dec; --green:#13a66b; --red:#d93025; --amber:#b7791f; }
+	* { box-sizing:border-box; }
+	html, body { width:100%; min-height:100%; margin:0; font-family:Arial,"Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+	button, input, select, textarea { font-family:inherit; }
+	.finance-page { min-height:100%; padding:14px 14px 88px; }
+	.toolbar, .panel, .stat { background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 24px rgba(31,41,55,.06); }
+	.toolbar { padding:14px; }
+	.summary-row, .filter-actions, .action-group, .pagination, .modal-head, .modal-actions { display:flex; align-items:center; gap:8px; }
+	.summary-row { justify-content:space-between; gap:12px; }
+	.title-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+	.page-title { margin:0; font-size:20px; line-height:28px; }
+	.filter-grid { display:grid; grid-template-columns:minmax(220px,360px) auto; gap:10px; margin-top:12px; align-items:end; }
+	.field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+	.field label { font-size:12px; color:var(--muted); }
+	.field input, .field select, .field textarea { width:100%; min-height:34px; padding:0 10px; border:1px solid var(--line); border-radius:6px; outline:0; background:#fff; color:var(--text); font-size:13px; }
+	.field input.datetime-input { width:176px; max-width:100%; cursor:pointer; }
+	.field textarea { min-height:70px; padding:8px 10px; resize:vertical; }
+	.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(62,124,255,.12); }
+	.datetime-select { display:inline-flex; align-items:center; min-height:34px; width:max-content; max-width:100%; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); font-size:13px; cursor:pointer; overflow-x:auto; }
+	.datetime-select:hover { border-color:var(--blue); }
+	.datetime-select .start-datetime, .datetime-select .end-datetime { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+	.datetime-select .time-line { width:22px; height:1px; margin:0 9px; background:var(--line); flex:0 0 auto; }
+	.datetime-select .date { font-weight:700; }
+	.datetime-select .time { color:var(--muted); }
+	.datetime-select.hidden-picker { position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; }
+	.dateTimeSelector-wraper.single-datetime-mode { width:260px; }
+	.dateTimeSelector-wraper.single-datetime-mode .left { width:100%; padding-right:0; }
+	.dateTimeSelector-wraper.single-datetime-mode .right { display:none; }
+	.stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:14px; }
+	.stat { padding:14px; }
+	.stat-label { color:var(--muted); font-size:12px; }
+	.stat-value { margin-top:6px; font-size:24px; font-weight:800; line-height:32px; }
+	.stat-value.bill { color:var(--blue); }
+	.stat-value.payment { color:var(--green); }
+	.stat-value.debt { color:var(--red); }
+	.content-grid { display:grid; grid-template-columns:minmax(360px,41%) minmax(0,1fr); gap:14px; margin-top:14px; align-items:start; }
+	.panel { overflow:hidden; }
+	.panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-bottom:1px solid var(--line-soft); background:#fbfdff; }
+	.panel-title { margin:0; font-size:15px; line-height:22px; }
+	.table-scroll { width:100%; overflow:auto; }
+	table { width:100%; border-collapse:collapse; }
+	th, td { border-bottom:1px solid var(--line-soft); padding:11px 12px; text-align:left; vertical-align:top; font-size:13px; }
+	th { position:sticky; top:0; z-index:1; background:#f8fafc; color:#4b5563; font-weight:700; }
+	tbody tr:hover { background:#fbfdff; }
+	.merchant-table { min-width:680px; }
+	.ledger-table, .payment-table, .debt-table { min-width:760px; }
+	.merchant-table tbody tr { cursor:pointer; }
+	.merchant-table tbody tr.is-selected { background:#edf5ff; }
+	.money { white-space:nowrap; font-weight:800; }
+	.money.bill { color:var(--blue); }
+	.money.payment { color:var(--green); }
+	.money.debt { color:var(--red); }
+	.money.income { color:var(--blue); }
+	.money.out { color:var(--green); }
+	.money.masked { letter-spacing:1px; }
+	.meta-stack { display:grid; gap:6px; }
+	.meta-line { display:flex; align-items:flex-start; gap:6px; line-height:20px; }
+	.meta-label { flex:0 0 auto; color:var(--muted); }
+	.meta-value { min-width:0; word-break:break-all; }
+	.tag { display:inline-flex; align-items:center; min-height:22px; padding:0 8px; border-radius:999px; background:#eef4ff; color:var(--blue); font-size:12px; font-weight:700; }
+	.tag.payment { background:#e8f8f1; color:var(--green); }
+	.btn, .link-btn, .icon-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--text); cursor:pointer; white-space:nowrap; }
+	.btn { height:34px; padding:0 14px; font-size:13px; }
+	.link-btn { min-height:28px; padding:0 10px; border-color:#cfe0ff; border-radius:5px; background:#f3f7ff; color:var(--blue); font-size:12px; }
+	.icon-btn { width:34px; height:34px; padding:0; }
+	.btn:hover, .link-btn:hover, .icon-btn:hover { border-color:var(--blue); color:var(--blue); }
+	.btn.primary { border-color:var(--blue); background:var(--blue); color:#fff; }
+	.btn.primary:hover { background:var(--blue-dark); color:#fff; }
+	.link-btn.danger { border-color:#ffd9d6; background:#fff5f4; color:var(--red); }
+	.icon { width:15px; height:15px; flex:0 0 auto; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+	.icon-sprite { position:absolute; width:0; height:0; overflow:hidden; }
+	.empty-row td, .loading-row td { padding:28px 12px; text-align:center; color:var(--muted); }
+	.sub-panels { display:grid; gap:14px; }
+	.modal-backdrop { position:fixed; inset:0; z-index:40; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(15,23,42,.48); }
+	.modal-backdrop.show { display:flex; }
+	.modal { width:min(560px,100%); max-height:calc(100vh - 36px); overflow:auto; border-radius:8px; background:#fff; box-shadow:0 18px 50px rgba(15,23,42,.26); }
+	.modal-head { justify-content:space-between; padding:14px; border-bottom:1px solid var(--line-soft); }
+	.modal-title { margin:0; font-size:18px; line-height:26px; }
+	.modal-body { display:grid; gap:12px; padding:14px; }
+	.modal-actions { justify-content:flex-end; padding:14px; border-top:1px solid var(--line-soft); }
+	.toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); z-index:50; display:none; padding:9px 14px; border-radius:6px; background:rgba(17,24,39,.92); color:#fff; font-size:13px; }
+	.toast.show { display:block; }
+	@media (max-width:1120px) { .content-grid{grid-template-columns:1fr;} .filter-grid{grid-template-columns:repeat(2,minmax(140px,1fr));} }
+	@media (max-width:760px) { .finance-page{padding:10px 10px 76px;} .summary-row{align-items:flex-start; flex-direction:column;} .filter-grid,.stats{grid-template-columns:1fr;} .datetime-select{width:100%;} .filter-actions{flex-wrap:wrap;} .filter-actions .btn{flex:1 1 120px;} }
+</style>
+</head>
+<body>
+	<svg class="icon-sprite" aria-hidden="true">
+		<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></symbol>
+		<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></symbol>
+		<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></symbol>
+		<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></symbol>
+		<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></symbol>
+		<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+		<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18"></path><path d="M10.7 5.1A9.5 9.5 0 0 1 12 5c6.5 0 10 7 10 7a17.3 17.3 0 0 1-3.1 4.2"></path><path d="M6.6 6.6C3.6 8.5 2 12 2 12s3.5 7 10 7a9.9 9.9 0 0 0 4.4-1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></symbol>
+	</svg>
+	<div class="finance-page">
+		<section class="toolbar">
+			<div class="summary-row">
+				<div class="title-tools">
+					<h1 class="page-title">财务统计</h1>
+					<button class="icon-btn" type="button" id="toggleMoneyVisible" title="显示金额" aria-label="显示金额"><svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg></button>
+				</div>
+				<div class="action-group"><button class="btn" type="button" id="openDebt"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>新增欠款</button><button class="btn primary" type="button" id="openPayment"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>新增收款</button></div>
+			</div>
+			<div class="filter-grid">
+				<div class="field"><label for="merchantKeyword">商家</label><input id="merchantKeyword" type="text" placeholder="商家名称或编号"></div>
+				<div class="field"><label>&nbsp;</label><div class="filter-actions"><button class="btn primary" type="button" id="searchFinance">搜索</button><button class="btn" type="button" id="resetFilters">重置</button><button class="btn" type="button" id="refreshFinance"><svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>刷新</button></div></div>
+			</div>
+		</section>
+		<div class="datetime-select hidden-picker" id="paymentTimePicker">
+			<div class="start-datetime"><div class="date" year="2026" month="7" day="6">2026-07-06</div><div class="time" hour="00" minute="00" second="00">00:00:00</div></div>
+			<div class="time-line"></div>
+			<div class="end-datetime"><div class="date" year="2026" month="7" day="6">2026-07-06</div><div class="time" hour="23" minute="59" second="59">23:59:59</div></div>
+		</div>
+
+		<section class="stats">
+			<div class="stat"><div class="stat-label">总交易流水</div><div class="stat-value bill" id="totalBillAmount">0.00</div></div>
+			<div class="stat"><div class="stat-label">已收款</div><div class="stat-value payment" id="totalPaymentAmount">0.00</div></div>
+			<div class="stat"><div class="stat-label">欠款</div><div class="stat-value debt" id="totalDebtAmount">0.00</div></div>
+		</section>
+
+		<div class="content-grid">
+			<section class="panel">
+				<div class="panel-head"><h2 class="panel-title">商家汇总</h2><span class="tag" id="merchantCount">0 个商家</span></div>
+				<div class="table-scroll">
+					<table class="merchant-table">
+						<thead>
+							<tr>
+								<th>商家</th>
+								<th>总交易流水</th>
+								<th>已收款</th>
+								<th>欠款</th>
+								<th>已核对账单</th>
+							</tr>
+						</thead>
+						<tbody id="summaryRows">
+							<tr class="loading-row"><td colspan="5">正在获取财务数据...</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<div class="sub-panels">
+				<section class="panel">
+					<div class="panel-head"><h2 class="panel-title">交易流水</h2><span class="tag" id="selectedMerchantLabel">全部商家</span></div>
+					<div class="table-scroll">
+						<table class="ledger-table">
+							<thead>
+								<tr>
+									<th>时间</th>
+									<th>类型</th>
+									<th>商家</th>
+									<th>金额</th>
+									<th>来源/备注</th>
+								</tr>
+							</thead>
+							<tbody id="ledgerRows">
+								<tr class="loading-row"><td colspan="5">正在获取交易流水...</td></tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<section class="panel">
+					<div class="panel-head"><h2 class="panel-title">欠款记录</h2><button class="btn" type="button" id="openDebtSmall"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>新增</button></div>
+					<div class="table-scroll">
+						<table class="debt-table">
+							<thead>
+								<tr>
+									<th>欠款时间</th>
+									<th>商家</th>
+									<th>金额</th>
+									<th>备注</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+							<tbody id="debtRows">
+								<tr class="loading-row"><td colspan="5">正在获取欠款记录...</td></tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<section class="panel">
+					<div class="panel-head"><h2 class="panel-title">收款记录</h2><button class="btn" type="button" id="openPaymentSmall"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>新增</button></div>
+					<div class="table-scroll">
+						<table class="payment-table">
+							<thead>
+								<tr>
+									<th>收款时间</th>
+									<th>商家</th>
+									<th>金额</th>
+									<th>备注</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+							<tbody id="paymentRows">
+								<tr class="loading-row"><td colspan="5">正在获取收款记录...</td></tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-backdrop" id="paymentModal">
+		<div class="modal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+			<div class="modal-head">
+				<h2 class="modal-title" id="paymentTitle">新增收款</h2>
+				<button class="icon-btn" type="button" id="closePayment" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
+			</div>
+			<form id="paymentForm">
+				<div class="modal-body">
+					<input id="paymentId" type="hidden">
+					<div class="field"><label for="paymentMerchant">商家</label><select id="paymentMerchant"></select></div>
+					<div class="field"><label for="paymentAmount">收款金额</label><input id="paymentAmount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+					<div class="field"><label for="paymentTime">收款时间</label><input class="datetime-input" id="paymentTime" type="text" placeholder="2026-07-06 12:00:00" autocomplete="off" readonly></div>
+					<div class="field"><label for="paymentRemark">备注</label><textarea id="paymentRemark" placeholder="收款方式、流水号等"></textarea></div>
+				</div>
+				<div class="modal-actions">
+					<button class="btn" type="button" id="cancelPayment">取消</button>
+					<button class="btn primary" type="submit">保存</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="modal-backdrop" id="debtModal">
+		<div class="modal" role="dialog" aria-modal="true" aria-labelledby="debtTitle">
+			<div class="modal-head">
+				<h2 class="modal-title" id="debtTitle">新增欠款</h2>
+				<button class="icon-btn" type="button" id="closeDebt" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
+			</div>
+			<form id="debtForm">
+				<div class="modal-body">
+					<input id="debtId" type="hidden">
+					<div class="field"><label for="debtMerchant">商家</label><select id="debtMerchant"></select></div>
+					<div class="field"><label for="debtAmount">欠款金额</label><input id="debtAmount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+					<div class="field"><label for="debtTime">欠款时间</label><input class="datetime-input" id="debtTime" type="text" placeholder="2026-07-06 12:00:00" autocomplete="off" readonly></div>
+					<div class="field"><label for="debtRemark">备注</label><textarea id="debtRemark" placeholder="欠款原因、期初余额等"></textarea></div>
+				</div>
+				<div class="modal-actions">
+					<button class="btn" type="button" id="cancelDebt">取消</button>
+					<button class="btn primary" type="submit">保存</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="toast" id="toast">财务数据已更新</div>
+
+<script src="../js/jquery.min.js"></script>
+<script src="../js/format-template.js"></script>
+<script src="../js/dateTimeSelector.js"></script>
+<script>
+	$(function () {
+		var API_BASE = '../api';
+		var summary = [];
+		var ledger = [];
+		var payments = [];
+		var debts = [];
+		var merchants = [];
+		var selectedMerchantKey = '';
+		var moneyVisible = false;
+		var $toast = $('#toast');
+
+		function showToast(text) {
+			$toast.text(text).addClass('show');
+			window.clearTimeout(showToast.timer);
+			showToast.timer = window.setTimeout(function () { $toast.removeClass('show'); }, 1800);
+		}
+		function escapeHtml(value) {
+			return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+		}
+		function getToken() {
+			try { return (JSON.parse(localStorage.getItem('orders-token') || '{}').token || '').trim(); }
+			catch (error) { return ''; }
+		}
+		function requestJson(url, postdata) {
+			return fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json;charset=UTF-8', 'token': getToken() },
+				body: JSON.stringify(postdata || {}),
+				redirect: 'follow'
+			}).then(function (res) { return res.json(); });
+		}
+		function money(value) { return (Number(value) || 0).toFixed(2); }
+		function shouldMaskMoney(value) { return Math.abs(Number(value) || 0) > 1000 && !moneyVisible; }
+		function displayMoney(value) { return shouldMaskMoney(value) ? '***' : money(value); }
+		function moneyClass(value) { return shouldMaskMoney(value) ? ' masked' : ''; }
+		function signedDisplayMoney(value, sign) { return shouldMaskMoney(value) ? '***' : sign + money(Math.abs(Number(value) || 0)); }
+		function updateMoneyToggle() {
+			$('#toggleMoneyVisible')
+				.attr('title', moneyVisible ? '隐藏金额' : '显示金额')
+				.attr('aria-label', moneyVisible ? '隐藏金额' : '显示金额')
+				.find('use').attr('href', moneyVisible ? '#i-eye-off' : '#i-eye');
+		}
+		function datetimeLocal(value) {
+			if (!value) { return ''; }
+			var normalized = String(value).replace('T', ' ');
+			return normalized.length === 16 ? normalized + ':00' : normalized.slice(0, 19);
+		}
+		function nowLocalDateTime() {
+			var now = new Date();
+			return now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate()) + ' ' + pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
+		}
+		function apiTime(value) {
+			var normalized = String(value || '').replace('T', ' ');
+			return normalized.length === 16 ? normalized + ':00' : normalized;
+		}
+		function pad2(value) {
+			value = parseInt(value, 10) || 0;
+			return value < 10 ? '0' + value : String(value);
+		}
+		function parseDateTime(value, fallbackEnd) {
+			var match = String(value || '').match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+			var now = new Date();
+			return match ? {
+				year: parseInt(match[1], 10),
+				month: parseInt(match[2], 10),
+				day: parseInt(match[3], 10),
+				hour: match[4] == null ? (fallbackEnd ? 23 : 0) : parseInt(match[4], 10),
+				minute: match[5] == null ? (fallbackEnd ? 59 : 0) : parseInt(match[5], 10),
+				second: match[6] == null ? (fallbackEnd ? 59 : 0) : parseInt(match[6], 10)
+			} : {
+				year: now.getFullYear(),
+				month: now.getMonth() + 1,
+				day: now.getDate(),
+				hour: fallbackEnd ? 23 : 0,
+				minute: fallbackEnd ? 59 : 0,
+				second: fallbackEnd ? 59 : 0
+			};
+		}
+		function setPickerPart($root, side, value) {
+			var $side = $root.find(side);
+			$side.find('.date').attr({ year:value.year, month:value.month, day:value.day }).text(value.year + '-' + pad2(value.month) + '-' + pad2(value.day));
+			$side.find('.time').attr({ hour:pad2(value.hour), minute:pad2(value.minute), second:pad2(value.second) }).text(pad2(value.hour) + ':' + pad2(value.minute) + ':' + pad2(value.second));
+		}
+		function partValue($root, side) {
+			var $side = $root.find(side);
+			return $side.find('.date').text() + ' ' + $side.find('.time').text();
+		}
+		function openDateTimePicker(config) {
+			var start = parseDateTime(config.startValue, false);
+			var end = parseDateTime(config.endValue, true);
+			var $range = $(config.target);
+			setPickerPart($range, '.start-datetime', start);
+			setPickerPart($range, '.end-datetime', end);
+			$('.dateTimeSelector-wraper').toggleClass('single-datetime-mode', !!config.single).attr('target', config.target).show();
+			initialization_ds(new Date(start.year, start.month - 1, start.day), new Date(end.year, end.month - 1, end.day), config.target);
+			$('.dateTimeSelector-wraper .left .time .clock').val(pad2(start.hour));
+			$('.dateTimeSelector-wraper .left .time .minute').val(pad2(start.minute));
+			$('.dateTimeSelector-wraper .left .time .second').val(pad2(start.second));
+			$('.dateTimeSelector-wraper .right .time .clock').val(pad2(end.hour));
+			$('.dateTimeSelector-wraper .right .time .minute').val(pad2(end.minute));
+			$('.dateTimeSelector-wraper .right .time .second').val(pad2(end.second));
+			if (typeof setDateTime === 'function') { setDateTime(config.target); }
+			if (typeof positionDateTimeSelector === 'function') { positionDateTimeSelector(config.anchor); }
+		}
+		function syncPaymentTimeFromPicker() {
+			$('#paymentTime').val(partValue($('#paymentTimePicker'), '.start-datetime'));
+		}
+		function syncDebtTimeFromPicker() {
+			$('#debtTime').val(partValue($('#paymentTimePicker'), '.start-datetime'));
+		}
+		function merchantText(item) {
+			var code = item.merchantCode || item.mid || '';
+			var name = item.merchantName || '';
+			return code && name ? code + ' - ' + name : (name || code || '未指定商家');
+		}
+		function merchantKeyFromMerchant(merchant) {
+			if (merchant.id) { return 'id:' + merchant.id; }
+			if (merchant.mid) { return 'code:' + merchant.mid; }
+			return 'name:' + (merchant.merchantName || '');
+		}
+		function selectedSummary() {
+			return summary.find(function (item) { return item.merchantKey === selectedMerchantKey; }) || null;
+		}
+		function filteredLedger() {
+			return selectedMerchantKey ? ledger.filter(function (item) { return item.merchantKey === selectedMerchantKey; }) : ledger;
+		}
+		function filteredPayments() {
+			return selectedMerchantKey ? payments.filter(function (item) {
+				var key = item.merchantId ? 'id:' + item.merchantId : (item.merchantCode ? 'code:' + item.merchantCode : 'name:' + (item.merchantName || ''));
+				return key === selectedMerchantKey;
+			}) : payments;
+		}
+		function filteredDebts() {
+			return selectedMerchantKey ? debts.filter(function (item) {
+				var key = item.merchantId ? 'id:' + item.merchantId : (item.merchantCode ? 'code:' + item.merchantCode : 'name:' + (item.merchantName || ''));
+				return key === selectedMerchantKey;
+			}) : debts;
+		}
+		function renderMerchantOptions(selectedKey) {
+			var html = merchants.map(function (merchant) {
+				var key = merchantKeyFromMerchant(merchant);
+				return '<option value="' + escapeHtml(key) + '" data-id="' + escapeHtml(merchant.id || '') + '" data-code="' + escapeHtml(merchant.mid || '') + '" data-name="' + escapeHtml(merchant.merchantName || '') + '">' + escapeHtml(merchantText(merchant)) + '</option>';
+			}).join('');
+			if (!html) {
+				html = '<option value="">暂无商家</option>';
+			}
+			$('#paymentMerchant, #debtMerchant').html(html);
+			if (selectedKey) {
+				$('#paymentMerchant').val(selectedKey);
+				$('#debtMerchant').val(selectedKey);
+			}
+		}
+		function loadMerchants() {
+			return requestJson(API_BASE + '/getMerchants/index.php', {}).then(function (data) {
+				merchants = data && data.success && Array.isArray(data.data) ? data.data : [];
+				renderMerchantOptions(selectedMerchantKey);
+			}).catch(function () {
+				merchants = [];
+				renderMerchantOptions('');
+			});
+		}
+		function renderStats() {
+			var billTotal = 0;
+			var paymentTotal = 0;
+			var debtTotal = 0;
+			summary.forEach(function (item) {
+				billTotal += Number(item.billAmount) || 0;
+				paymentTotal += Number(item.paymentAmount) || 0;
+				debtTotal += Number(item.debtAmount) || 0;
+			});
+			$('#totalBillAmount').text(displayMoney(billTotal)).toggleClass('masked', shouldMaskMoney(billTotal));
+			$('#totalPaymentAmount').text(displayMoney(paymentTotal)).toggleClass('masked', shouldMaskMoney(paymentTotal));
+			$('#totalDebtAmount').text(displayMoney(debtTotal)).toggleClass('masked', shouldMaskMoney(debtTotal));
+			$('#merchantCount').text(summary.length + ' 个商家');
+		}
+		function renderSummary() {
+			if (!summary.length) {
+				$('#summaryRows').html('<tr class="empty-row"><td colspan="5">暂无财务数据</td></tr>');
+				return;
+			}
+			$('#summaryRows').html(summary.map(function (item) {
+				return [
+					'<tr data-merchant-key="' + escapeHtml(item.merchantKey || '') + '" class="' + (item.merchantKey === selectedMerchantKey ? 'is-selected' : '') + '">',
+					'<td><div class="meta-stack"><strong>' + escapeHtml(item.merchantName || '未指定商家') + '</strong><span class="meta-value">' + escapeHtml(item.merchantCode || item.merchantId || '-') + '</span></div></td>',
+					'<td><span class="money bill' + moneyClass(item.billAmount) + '">' + displayMoney(item.billAmount) + '</span></td>',
+					'<td><span class="money payment' + moneyClass(item.paymentAmount) + '">' + displayMoney(item.paymentAmount) + '</span></td>',
+					'<td><span class="money debt' + moneyClass(item.debtAmount) + '">' + displayMoney(item.debtAmount) + '</span></td>',
+					'<td>' + escapeHtml(item.checkedBillCount || 0) + '</td>',
+					'</tr>'
+				].join('');
+			}).join(''));
+		}
+		function renderLedger() {
+			var rows = filteredLedger();
+			var selected = selectedSummary();
+			$('#selectedMerchantLabel').text(selected ? merchantText(selected) : '全部商家');
+			if (!rows.length) {
+				$('#ledgerRows').html('<tr class="empty-row"><td colspan="5">暂无交易流水</td></tr>');
+				return;
+			}
+			$('#ledgerRows').html(rows.map(function (item) {
+				var isPayment = item.type === 'payment';
+				var isDebt = item.type === 'debt';
+				return [
+					'<tr>',
+					'<td>' + escapeHtml(item.flowTime || '-') + '</td>',
+					'<td><span class="tag ' + (isPayment ? 'payment' : '') + '">' + escapeHtml(item.typeName || '-') + '</span></td>',
+					'<td>' + escapeHtml(merchantText(item)) + '</td>',
+					'<td><span class="money ' + (isPayment ? 'out' : (isDebt ? 'debt' : 'income')) + moneyClass(item.amount) + '">' + signedDisplayMoney(item.amount, isPayment ? '-' : '+') + '</span></td>',
+					'<td><div class="meta-stack">' + (item.shareCode ? '<span>账单：' + escapeHtml(item.shareCode) + '</span>' : '') + '<span>' + escapeHtml(item.remark || '-') + '</span></div></td>',
+					'</tr>'
+				].join('');
+			}).join(''));
+		}
+		function renderPayments() {
+			var rows = filteredPayments();
+			if (!rows.length) {
+				$('#paymentRows').html('<tr class="empty-row"><td colspan="5">暂无收款记录</td></tr>');
+				return;
+			}
+			$('#paymentRows').html(rows.map(function (item) {
+				return [
+					'<tr data-payment-id="' + escapeHtml(item.id || '') + '">',
+					'<td>' + escapeHtml(item.paymentTime || '-') + '</td>',
+					'<td>' + escapeHtml(merchantText(item)) + '</td>',
+					'<td><span class="money payment' + moneyClass(item.amount) + '">' + displayMoney(item.amount) + '</span></td>',
+					'<td>' + escapeHtml(item.remark || '-') + '</td>',
+					'<td><div class="action-group"><button class="link-btn edit-payment" type="button"><svg class="icon" aria-hidden="true"><use href="#i-edit"></use></svg>编辑</button><button class="link-btn danger delete-payment" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>删除</button></div></td>',
+					'</tr>'
+				].join('');
+			}).join(''));
+		}
+		function renderDebts() {
+			var rows = filteredDebts();
+			if (!rows.length) {
+				$('#debtRows').html('<tr class="empty-row"><td colspan="5">暂无欠款记录</td></tr>');
+				return;
+			}
+			$('#debtRows').html(rows.map(function (item) {
+				return [
+					'<tr data-debt-id="' + escapeHtml(item.id || '') + '">',
+					'<td>' + escapeHtml(item.debtTime || '-') + '</td>',
+					'<td>' + escapeHtml(merchantText(item)) + '</td>',
+					'<td><span class="money debt' + moneyClass(item.amount) + '">' + displayMoney(item.amount) + '</span></td>',
+					'<td>' + escapeHtml(item.remark || '-') + '</td>',
+					'<td><div class="action-group"><button class="link-btn edit-debt" type="button"><svg class="icon" aria-hidden="true"><use href="#i-edit"></use></svg>编辑</button><button class="link-btn danger delete-debt" type="button"><svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>删除</button></div></td>',
+					'</tr>'
+				].join('');
+			}).join(''));
+		}
+		function renderAll() {
+			renderStats();
+			renderSummary();
+			renderLedger();
+			renderDebts();
+			renderPayments();
+		}
+		function loadFinance() {
+			$('#summaryRows').html('<tr class="loading-row"><td colspan="5">正在获取财务数据...</td></tr>');
+			$('#ledgerRows').html('<tr class="loading-row"><td colspan="5">正在获取交易流水...</td></tr>');
+			$('#debtRows').html('<tr class="loading-row"><td colspan="5">正在获取欠款记录...</td></tr>');
+			$('#paymentRows').html('<tr class="loading-row"><td colspan="5">正在获取收款记录...</td></tr>');
+			return requestJson(API_BASE + '/getFinanceSummary/index.php', {
+				merchantKeyword: ($('#merchantKeyword').val() || '').trim()
+			}).then(function (data) {
+				if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : '获取财务数据失败'); }
+				summary = Array.isArray(data.summary) ? data.summary : [];
+				ledger = Array.isArray(data.ledger) ? data.ledger : [];
+				payments = Array.isArray(data.payments) ? data.payments : [];
+				debts = Array.isArray(data.debts) ? data.debts : [];
+				if (selectedMerchantKey && !summary.some(function (item) { return item.merchantKey === selectedMerchantKey; })) {
+					selectedMerchantKey = '';
+				}
+				renderAll();
+			}).catch(function (error) {
+				summary = [];
+				ledger = [];
+				payments = [];
+				debts = [];
+				renderAll();
+				showToast(error.message || '获取财务数据失败');
+			});
+		}
+		function openPaymentModal(payment) {
+			$('#paymentTitle').text(payment ? '编辑收款' : '新增收款');
+			$('#paymentId').val(payment ? payment.id || '' : '');
+			renderMerchantOptions(payment ? (payment.merchantId ? 'id:' + payment.merchantId : (payment.merchantCode ? 'code:' + payment.merchantCode : '')) : selectedMerchantKey);
+			$('#paymentAmount').val(payment ? payment.amount || '' : '');
+			$('#paymentTime').val(payment ? datetimeLocal(payment.paymentTime) : nowLocalDateTime());
+			$('#paymentRemark').val(payment ? payment.remark || '' : '');
+			$('#paymentModal').addClass('show');
+		}
+		function closePaymentModal() {
+			$('#paymentModal').removeClass('show');
+		}
+		function openDebtModal(debt) {
+			$('#debtTitle').text(debt ? '编辑欠款' : '新增欠款');
+			$('#debtId').val(debt ? debt.id || '' : '');
+			renderMerchantOptions(debt ? (debt.merchantId ? 'id:' + debt.merchantId : (debt.merchantCode ? 'code:' + debt.merchantCode : '')) : selectedMerchantKey);
+			$('#debtAmount').val(debt ? debt.amount || '' : '');
+			$('#debtTime').val(debt ? datetimeLocal(debt.debtTime) : nowLocalDateTime());
+			$('#debtRemark').val(debt ? debt.remark || '' : '');
+			$('#debtModal').addClass('show');
+		}
+		function closeDebtModal() {
+			$('#debtModal').removeClass('show');
+		}
+		function findPayment($button) {
+			var id = $button.closest('tr').attr('data-payment-id');
+			return payments.find(function (item) { return String(item.id) === String(id); }) || null;
+		}
+		function findDebt($button) {
+			var id = $button.closest('tr').attr('data-debt-id');
+			return debts.find(function (item) { return String(item.id) === String(id); }) || null;
+		}
+		function paymentPayload() {
+			var $option = $('#paymentMerchant option:selected');
+			return {
+				id: $('#paymentId').val(),
+				merchantId: $option.attr('data-id') || '',
+				merchantCode: $option.attr('data-code') || '',
+				merchantName: $option.attr('data-name') || '',
+				amount: $('#paymentAmount').val(),
+				paymentTime: apiTime($('#paymentTime').val()),
+				remark: $('#paymentRemark').val()
+			};
+		}
+		function debtPayload() {
+			var $option = $('#debtMerchant option:selected');
+			return {
+				id: $('#debtId').val(),
+				merchantId: $option.attr('data-id') || '',
+				merchantCode: $option.attr('data-code') || '',
+				merchantName: $option.attr('data-name') || '',
+				amount: $('#debtAmount').val(),
+				debtTime: apiTime($('#debtTime').val()),
+				remark: $('#debtRemark').val()
+			};
+		}
+
+		$('#summaryRows').on('click', 'tr[data-merchant-key]', function () {
+			var key = $(this).attr('data-merchant-key');
+			selectedMerchantKey = selectedMerchantKey === key ? '' : key;
+			renderAll();
+		});
+		$('#toggleMoneyVisible').on('click', function () {
+			moneyVisible = !moneyVisible;
+			updateMoneyToggle();
+			renderAll();
+		});
+		updateMoneyToggle();
+		$('#openPayment, #openPaymentSmall').on('click', function () { openPaymentModal(null); });
+		$('#closePayment, #cancelPayment').on('click', closePaymentModal);
+		$('#paymentModal').on('click', function (event) { if (event.target === this) { closePaymentModal(); } });
+		$('#openDebt, #openDebtSmall').on('click', function () { openDebtModal(null); });
+		$('#closeDebt, #cancelDebt').on('click', closeDebtModal);
+		$('#debtModal').on('click', function (event) { if (event.target === this) { closeDebtModal(); } });
+		$('#paymentRows').on('click', '.edit-payment', function () {
+			var payment = findPayment($(this));
+			if (payment) { openPaymentModal(payment); }
+		});
+		$('#paymentRows').on('click', '.delete-payment', function () {
+			var payment = findPayment($(this));
+			if (!payment) { return; }
+			if (!confirm('确定删除这条收款记录吗？')) { return; }
+			if (!confirm('再次确认：删除后欠款会重新计算，继续删除？')) { return; }
+			requestJson(API_BASE + '/delPayment/index.php', { id: payment.id }).then(function (data) {
+				if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : '删除收款失败'); }
+				showToast('收款记录已删除');
+				loadFinance();
+			}).catch(function (error) { showToast(error.message || '删除收款失败'); });
+		});
+		$('#debtRows').on('click', '.edit-debt', function () {
+			var debt = findDebt($(this));
+			if (debt) { openDebtModal(debt); }
+		});
+		$('#debtRows').on('click', '.delete-debt', function () {
+			var debt = findDebt($(this));
+			if (!debt) { return; }
+			if (!confirm('确定删除这条欠款记录吗？')) { return; }
+			if (!confirm('再次确认：删除后欠款会重新计算，继续删除？')) { return; }
+			requestJson(API_BASE + '/delDebt/index.php', { id: debt.id }).then(function (data) {
+				if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : '删除欠款失败'); }
+				showToast('欠款记录已删除');
+				loadFinance();
+			}).catch(function (error) { showToast(error.message || '删除欠款失败'); });
+		});
+		$('#paymentForm').on('submit', function (event) {
+			event.preventDefault();
+			var payload = paymentPayload();
+			if (!payload.merchantId && !payload.merchantCode && !payload.merchantName) { showToast('请选择商家'); return; }
+			if ((Number(payload.amount) || 0) <= 0) { showToast('请输入收款金额'); return; }
+			var url = payload.id ? '/updatePayment/index.php' : '/addPayment/index.php';
+			requestJson(API_BASE + url, payload).then(function (data) {
+				if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : '保存收款失败'); }
+				closePaymentModal();
+				showToast('收款记录已保存');
+				loadFinance();
+			}).catch(function (error) { showToast(error.message || '保存收款失败'); });
+		});
+		$('#debtForm').on('submit', function (event) {
+			event.preventDefault();
+			var payload = debtPayload();
+			if (!payload.merchantId && !payload.merchantCode && !payload.merchantName) { showToast('请选择商家'); return; }
+			if ((Number(payload.amount) || 0) <= 0) { showToast('请输入欠款金额'); return; }
+			var url = payload.id ? '/updateDebt/index.php' : '/addDebt/index.php';
+			requestJson(API_BASE + url, payload).then(function (data) {
+				if (!data || !data.success) { throw new Error(data && data.txt ? data.txt : '保存欠款失败'); }
+				closeDebtModal();
+				showToast('欠款记录已保存');
+				loadFinance();
+			}).catch(function (error) { showToast(error.message || '保存欠款失败'); });
+		});
+		$('#searchFinance').on('click', function () { selectedMerchantKey = ''; loadFinance(); });
+		$('#refreshFinance').on('click', loadFinance);
+		$('#resetFilters').on('click', function () { $('#merchantKeyword').val(''); selectedMerchantKey = ''; loadFinance(); });
+		$('#merchantKeyword').on('keydown', function (event) { if (event.key === 'Enter') { selectedMerchantKey = ''; loadFinance(); } });
+		$('#paymentTime').on('click', function (event) {
+			event.stopPropagation();
+			var value = $('#paymentTime').val();
+			openDateTimePicker({ target:'#paymentTimePicker', anchor:this, startValue:value, endValue:value, single:true });
+		});
+		$('#debtTime').on('click', function (event) {
+			event.stopPropagation();
+			var value = $('#debtTime').val();
+			openDateTimePicker({ target:'#paymentTimePicker', anchor:this, startValue:value, endValue:value, single:true });
+		});
+		$(document).on('click', '.dateTimeSelector-wraper .confirm-datetime', function () {
+			var target = $('.dateTimeSelector-wraper').attr('target');
+			if (target === '#paymentTimePicker') {
+				if ($('#debtModal').hasClass('show')) {
+					syncDebtTimeFromPicker();
+				} else {
+					syncPaymentTimeFromPicker();
+				}
+			}
+		});
+
+		loadMerchants().then(loadFinance);
+	});
+</script>
+</body>
+</html>
